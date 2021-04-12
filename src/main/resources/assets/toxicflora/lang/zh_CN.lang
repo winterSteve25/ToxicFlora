@@ -1,0 +1,26 @@
+#Chinese language file for toxic flora
+
+#creative tab
+
+itemGroup.ToxicFloraHerbs=含毒植物学-草药
+itemGroup.ToxicFloraMachines=含毒植物学-机器
+itemGroup.ToxicFloraTools=含毒植物学-工具
+itemGroup.ToxicFloraIngredient=含毒植物学-材料
+
+#item
+item.toxicflora.mortar_pestle.name=研钵和研杵
+item.toxicflora.mixing_bowl.name=搅拌碗
+item.toxicflora.empty.jar.name=瓶子
+item.toxicflora.jar.name=瓶装%s
+item.toxicflora.petal_datura.name=曼陀罗花瓣
+item.toxicflora.petal_hyacinth.name=风信子花瓣
+item.toxicflora.petal_oleander.name=夹竹桃花瓣
+item.toxicflora.shadow_cap.name=阴影帽
+
+item.toxicflora.ingot_toxic.name=含毒锭
+item.toxicflora.compound_toxic.name=巫毒化合物
+
+#block
+tile.toxicflora.shadeshroom.name=阴影菇
+tile.toxicflora.shadow_brick.name=影壁砖
+tile.toxicflora.infuser.name=草药注入器

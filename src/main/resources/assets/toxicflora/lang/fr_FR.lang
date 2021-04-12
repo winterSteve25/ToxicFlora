@@ -1,0 +1,24 @@
+#French language file for toxic flora
+
+#creative tab
+itemGroup.ToxicFloraHerbs=Toxic Flora-Herbes
+itemGroup.ToxicFloraMachines=Toxic Flora-Machinerie
+itemGroup.ToxicFloraTools=Toxic Flora-Outil
+itemGroup.ToxicFloraIngredient=Toxic Flora-Ingrédients
+
+#item
+item.toxicflora.mortar_pestle.name=Mortier Pilon
+item.toxicflora.mixing_bowl.name=Bol de mixage
+item.toxicflora.empty.jar.name=Pot
+item.toxicflora.jar.name=Pot de %s
+item.toxicflora.petal_datura.name=Pétale de Datura
+item.toxicflora.petal_hyacinth.name=Pétale de Hyacinth
+item.toxicflora.petal_oleander.name=Pétale de Oleander
+item.toxicflora.shadow_cap.name=Chapeau Ombre
+item.toxicflora.ingot_toxic.name=Lingot Toxique
+item.toxicflora.compound_toxic.name=Composé Toxique
+
+#block
+tile.toxicflora.shadeshroom.name=Champi Ombre
+tile.toxicflora.shadow_brick.name=Briques de l'ombre
+tile.toxicflora.infuser.name=Infuseur Herbalogique

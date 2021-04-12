@@ -1,0 +1,24 @@
+#English language file for toxic flora
+
+#creative tab
+itemGroup.ToxicFloraHerbs=Toxic Flora - Herbs
+itemGroup.ToxicFloraMachines=Toxic Flora - Machines
+itemGroup.ToxicFloraTools=Toxic Flora - Tools
+itemGroup.ToxicFloraIngredient=Toxic Flora - Ingredients
+
+#item
+item.toxicflora.mortar_pestle.name=Mortar and Pestle
+item.toxicflora.mixing_bowl.name=Mixing Bowl
+item.toxicflora.empty.jar.name=Jar
+item.toxicflora.jar.name=Jar With %s
+item.toxicflora.petal_datura.name=Datura Petal
+item.toxicflora.petal_hyacinth.name=Hyacinth Petal
+item.toxicflora.petal_oleander.name=Oleander Petal
+item.toxicflora.shadow_cap.name=Shadow Cap
+item.toxicflora.ingot_toxic.name=Toxic Ingot
+item.toxicflora.compound_toxic.name=Toxic Compound
+
+#block
+tile.toxicflora.shadeshroom.name=Shadeshroom
+tile.toxicflora.shadow_brick.name=Shadow Brick
+tile.toxicflora.infuser.name=Herbalogic Infuser

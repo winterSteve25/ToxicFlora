@@ -1,0 +1,10 @@
+{
+  "forge_marker": 1,
+  "defaults": {
+    "model": "toxicflora:shadow_brick"
+  },
+  "variants": {
+    "normal": [{}],
+    "inventory": [{}]
+  }
+}
