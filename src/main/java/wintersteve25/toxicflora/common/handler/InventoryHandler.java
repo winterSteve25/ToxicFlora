@@ -54,7 +54,7 @@ public class InventoryHandler {
             if(!stackAt.isEmpty()) {
                 ItemStack copy = stackAt.copy();
                 ItemHandlerHelper.giveItemToPlayer(player, copy);
-                inv.getItemHandler().extractItem(i, 1, true);
+                inv.getItemHandler().extractItem(i, copy.getCount(), false);
                 player.world.updateComparatorOutputLevel(inv.getPos(), null);
                 break;
             }

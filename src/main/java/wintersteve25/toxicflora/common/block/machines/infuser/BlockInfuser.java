@@ -8,6 +8,8 @@ import net.minecraft.tileentity.TileEntityNote;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraftforge.fluids.FluidUtil;
+import net.minecraftforge.fluids.capability.ItemFluidContainer;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 import wintersteve25.toxicflora.ToxicFlora;
@@ -28,6 +30,7 @@ import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import wintersteve25.toxicflora.common.handler.FluidHandler;
 import wintersteve25.toxicflora.common.handler.InventoryHandler;
 
 import javax.annotation.Nullable;
@@ -86,7 +89,7 @@ public class BlockInfuser extends Block implements ITileEntityProvider {
             TileEntity te = worldIn.getTileEntity(pos);
             if (te instanceof TileInfuser) {
                 TileInfuser teinfuser = (TileInfuser) te;
-                if (!itemstack.isEmpty()) {
+                if (!itemstack.isEmpty() && !FluidUtil.interactWithFluidHandler(playerIn, hand, worldIn, pos, facing)) {
                     boolean result = teinfuser.addItem(playerIn, itemstack, hand);
                     return result;
                 } else if (itemstack.isEmpty() && teinfuser.hasItem() && playerIn.isSneaking()) {
