@@ -30,7 +30,6 @@ import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import wintersteve25.toxicflora.common.handler.FluidHandler;
 import wintersteve25.toxicflora.common.handler.InventoryHandler;
 
 import javax.annotation.Nullable;
