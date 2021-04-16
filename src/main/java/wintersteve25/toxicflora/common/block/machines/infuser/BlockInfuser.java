@@ -97,13 +97,7 @@ public class BlockInfuser extends Block implements ITileEntityProvider {
                 }
             }
         }
-        return false;
-    }
-
-    @Nullable
-    private IFluidHandler getFluidHandler(IBlockAccess world, BlockPos pos){
-        TileInfuser teinfuser = (TileInfuser) world.getTileEntity(pos);
-        return teinfuser.getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, null);
+        return true;
     }
 
     @SideOnly(Side.CLIENT)
