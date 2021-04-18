@@ -10,6 +10,6 @@ public class TileInfuserRenderer extends TileEntitySpecialRenderer<TileInfuser> 
         if (!(te instanceof TileInfuser) || !te.hasWorld()) return;
         TileEntity teinfuser = (TileInfuser) te;
 
-        float fluidHeight = te.tank.getFluidAmount();
+        float fluidHeight = te.inputTank.getFluidAmount();
     }
 }

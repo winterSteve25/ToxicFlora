@@ -27,14 +27,12 @@ public class TileInfuser extends TileEntity implements ITickable, IFluidHandler,
             TileInfuser.this.markDirty();
         }
     };
-    private int progress = 0;
     private boolean isCrafting = false;
-    public boolean canCraft = false;
-    private int minVitality = 0;
-    private FluidStack fluidContent = null;
-
+    private FluidStack inputFluidContent = null;
+    private FluidStack outputFluidContent = null;
     private int capacity = Fluid.BUCKET_VOLUME*4;
-    public final FluidTank tank = new FluidTank(capacity);
+    public final FluidTank inputTank = new FluidTank(capacity);
+    public final FluidTank outputTank = new FluidTank(capacity);
     private IFluidTankProperties[] tankProperties;
     private boolean canFill = true;
     private boolean canDrain = true;
@@ -72,7 +70,8 @@ public class TileInfuser extends TileEntity implements ITickable, IFluidHandler,
     public NBTTagCompound writeToNBT(NBTTagCompound compound) {
         super.writeToNBT(compound);
         compound.setTag("items", itemHandler.serializeNBT());
-        tank.writeToNBT(compound);
+        inputTank.writeToNBT(compound);
+        outputTank.writeToNBT(compound);
         return compound;
     }
 
@@ -82,8 +81,11 @@ public class TileInfuser extends TileEntity implements ITickable, IFluidHandler,
         if(compound.hasKey("items")) {
             itemHandler.deserializeNBT(compound.getCompoundTag("items"));
         }
-        tank.readFromNBT(compound);
-        fluidContent = FluidStack.loadFluidStackFromNBT(compound);
+        inputTank.readFromNBT(compound);
+        inputFluidContent = FluidStack.loadFluidStackFromNBT(compound);
+
+        outputTank.readFromNBT(compound);
+        outputFluidContent = FluidStack.loadFluidStackFromNBT(compound);
     }
 
     @Override
@@ -136,7 +138,7 @@ public class TileInfuser extends TileEntity implements ITickable, IFluidHandler,
             return CapabilityItemHandler.ITEM_HANDLER_CAPABILITY.cast(itemHandler);
         }
         if (capability == CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY) {
-            return CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY.cast(tank);
+            return CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY.cast(inputTank);
         }
 
         return super.getCapability(capability, facing);
@@ -151,7 +153,10 @@ public class TileInfuser extends TileEntity implements ITickable, IFluidHandler,
     public IFluidTankProperties[] getTankProperties() {
         if (this.tankProperties == null)
         {
-            this.tankProperties = new IFluidTankProperties[] { new FluidTankPropertiesWrapper(tank) };
+            this.tankProperties = new IFluidTankProperties[] {
+                 new FluidTankPropertiesWrapper(inputTank),
+                 new FluidTankPropertiesWrapper(outputTank)
+            };
         }
         return this.tankProperties;
     }
@@ -159,16 +164,20 @@ public class TileInfuser extends TileEntity implements ITickable, IFluidHandler,
     @Nullable
     @Override
     public FluidStack getFluid() {
-        return fluidContent;
+        return inputFluidContent;
+    }
+
+    public FluidStack getOutputFluid() {
+        return outputFluidContent;
     }
 
     @Override
     public int getFluidAmount() {
-        if (fluidContent == null)
+        if (inputFluidContent == null)
         {
             return 0;
         }
-        return fluidContent.amount;
+        return inputFluidContent.amount;
     }
 
     @Override
@@ -194,9 +203,12 @@ public class TileInfuser extends TileEntity implements ITickable, IFluidHandler,
     @Nullable
     @Override
     public FluidStack drain(FluidStack resource, boolean doDrain) {
-        if (!canDrainFluidType(getFluid()))
-        {
+        if (!canDrainFluidType(getOutputFluid())) {
             return null;
+        } else if (!canDrainFluidType(getFluid())) {
+            return null;
+        } else if (canDrainFluidType(getOutputFluid())) {
+            return drainInternal(resource, doDrain);
         }
         return drainInternal(resource, doDrain);
     }
@@ -204,9 +216,13 @@ public class TileInfuser extends TileEntity implements ITickable, IFluidHandler,
     @Nullable
     public FluidStack drainInternal(FluidStack resource, boolean doDrain)
     {
-        if (resource == null || !resource.isFluidEqual(getFluid()))
-        {
+
+        if (resource == null || !resource.isFluidEqual(getOutputFluid())) {
             return null;
+        } else if (resource == null || !resource.isFluidEqual(getFluid())) {
+            return null;
+        } else if (resource.isFluidEqual(getOutputFluid())) {
+            return drainInternal(resource.amount, doDrain);
         }
         return drainInternal(resource.amount, doDrain);
     }
@@ -214,9 +230,12 @@ public class TileInfuser extends TileEntity implements ITickable, IFluidHandler,
     @Nullable
     @Override
     public FluidStack drain(int maxDrain, boolean doDrain) {
-        if (!canDrainFluidType(fluidContent))
-        {
+        if (!canDrainFluidType(outputFluidContent)) {
             return null;
+        } else if (!canDrainFluidType(inputFluidContent)) {
+            return null;
+        } else if (canDrainFluidType(outputFluidContent)) {
+            return drainInternal(maxDrain, doDrain);
         }
         return drainInternal(maxDrain, doDrain);
     }
@@ -225,31 +244,55 @@ public class TileInfuser extends TileEntity implements ITickable, IFluidHandler,
     public FluidStack drainInternal(int maxDrain, boolean doDrain)
     {
         TileInfuser tile = new TileInfuser();
-        if (fluidContent == null || maxDrain <= 0)
-        {
+        if (outputFluidContent != null) {
+            int drained = maxDrain;
+            if (outputFluidContent.amount < drained)
+            {
+                drained = outputFluidContent.amount;
+            }
+
+            FluidStack stack = new FluidStack(outputFluidContent, drained);
+            if (doDrain)
+            {
+                outputFluidContent.amount -= drained;
+                if (outputFluidContent.amount <= 0)
+                {
+                    outputFluidContent = null;
+                }
+
+                onContentsChanged();
+
+                if (tile != null)
+                {
+                    FluidEvent.fireEvent(new FluidEvent.FluidDrainingEvent(outputFluidContent, tile.getWorld(), tile.getPos(), this, drained));
+                }
+            }
+            return stack;
+        } else if (outputFluidContent == null) {
+            return null;
+        } else if (inputFluidContent == null || maxDrain <= 0) {
             return null;
         }
-
         int drained = maxDrain;
-        if (fluidContent.amount < drained)
+        if (inputFluidContent.amount < drained)
         {
-            drained = fluidContent.amount;
+            drained = inputFluidContent.amount;
         }
 
-        FluidStack stack = new FluidStack(fluidContent, drained);
+        FluidStack stack = new FluidStack(inputFluidContent, drained);
         if (doDrain)
         {
-            fluidContent.amount -= drained;
-            if (fluidContent.amount <= 0)
+            inputFluidContent.amount -= drained;
+            if (inputFluidContent.amount <= 0)
             {
-                fluidContent = null;
+                inputFluidContent = null;
             }
 
             onContentsChanged();
 
             if (tile != null)
             {
-                FluidEvent.fireEvent(new FluidEvent.FluidDrainingEvent(fluidContent, tile.getWorld(), tile.getPos(), this, drained));
+                FluidEvent.fireEvent(new FluidEvent.FluidDrainingEvent(inputFluidContent, tile.getWorld(), tile.getPos(), this, drained));
             }
         }
         return stack;
@@ -264,7 +307,7 @@ public class TileInfuser extends TileEntity implements ITickable, IFluidHandler,
         return canDrain;
     }
 
-    public boolean canFillFluidType(FluidStack fluidContent) {
+    public boolean canFillFluidType(FluidStack inputFluidContent) {
         return canFill();
     }
 
@@ -281,53 +324,53 @@ public class TileInfuser extends TileEntity implements ITickable, IFluidHandler,
 
         if (!doFill)
         {
-            if (fluidContent == null)
+            if (inputFluidContent == null)
             {
                 return Math.min(capacity, resource.amount);
             }
 
-            if (!fluidContent.isFluidEqual(resource))
+            if (!inputFluidContent.isFluidEqual(resource))
             {
                 return 0;
             }
 
-            return Math.min(capacity - fluidContent.amount, resource.amount);
+            return Math.min(capacity - inputFluidContent.amount, resource.amount);
         }
 
-        if (fluidContent == null)
+        if (inputFluidContent == null)
         {
-            fluidContent = new FluidStack(resource, Math.min(capacity, resource.amount));
+            inputFluidContent = new FluidStack(resource, Math.min(capacity, resource.amount));
 
             onContentsChanged();
 
             if (tile != null)
             {
-                FluidEvent.fireEvent(new FluidEvent.FluidFillingEvent(fluidContent, tile.getWorld(), tile.getPos(), this, fluidContent.amount));
+                FluidEvent.fireEvent(new FluidEvent.FluidFillingEvent(inputFluidContent, tile.getWorld(), tile.getPos(), this, inputFluidContent.amount));
             }
-            return fluidContent.amount;
+            return inputFluidContent.amount;
         }
 
-        if (!fluidContent.isFluidEqual(resource))
+        if (!inputFluidContent.isFluidEqual(resource))
         {
             return 0;
         }
-        int filled = capacity - fluidContent.amount;
+        int filled = capacity - inputFluidContent.amount;
 
         if (resource.amount < filled)
         {
-            fluidContent.amount += resource.amount;
+            inputFluidContent.amount += resource.amount;
             filled = resource.amount;
         }
         else
         {
-            fluidContent.amount = capacity;
+            inputFluidContent.amount = capacity;
         }
 
         onContentsChanged();
 
         if (tile != null)
         {
-            FluidEvent.fireEvent(new FluidEvent.FluidFillingEvent(fluidContent, tile.getWorld(), tile.getPos(), this, filled));
+            FluidEvent.fireEvent(new FluidEvent.FluidFillingEvent(inputFluidContent, tile.getWorld(), tile.getPos(), this, filled));
         }
         return filled;
     }

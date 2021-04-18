@@ -33,12 +33,12 @@ public class BlocksTF {
         blockInfuser.initModel();
     }
 
-    public static Block BlOCKSHADOWBRICK;
+    public static Block BLOCKSHADOWBRICK;
 
     static List<Block> blocksToxicFlora = new ArrayList<>();
     static List<Item> itemBlocksToxicFlora = new ArrayList<>();
     static {
-        BlOCKSHADOWBRICK = initBlock(new BaseToxicBlocks(Material.ROCK, "shadow_brick"));
+        BLOCKSHADOWBRICK = initBlock(new BaseToxicBlocks(Material.ROCK, "shadow_brick"));
     }
 
     @SubscribeEvent
