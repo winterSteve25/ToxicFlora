@@ -17,6 +17,8 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.items.CapabilityItemHandler;
+import wintersteve25.toxicflora.ToxicFlora;
+import wintersteve25.toxicflora.common.crafting.RecipeInfuser;
 
 import javax.annotation.Nullable;
 
@@ -37,12 +39,33 @@ public class TileInfuser extends TileEntity implements ITickable, IFluidHandler,
     private boolean canFill = true;
     private boolean canDrain = true;
 
-    public TileInfuser() {
-    }
-
     @Override
     public void update() {
+        if (world.isRemote) {
+            return;
+        }
+
         if (!world.isRemote) {
+            if(inputTank.getFluid() != null) {
+                if (!itemHandler.getStackInSlot(0).isEmpty()) {
+                    //if (isCrafting) {
+                        outputFluidContent = null;
+                        RecipeInfuser recipe = RecipeInfuser.getRecipe(inputTank, itemHandler.getStackInSlot(0));
+                        if (recipe == null) {
+                            isCrafting = false;
+                            return;
+                        } else if (recipe != null) {
+                            ToxicFlora.getLogger().info("TileInfuser Should be start crafting");
+                            outputFluidContent = recipe.getFluidOutput().copy();
+                            outputTank.setFluid(outputFluidContent);
+                            inputFluidContent = null;
+                            inputTank.drain(recipe.getFluidInput().amount, true);
+                            itemHandler.setStackInSlot(0, ItemStack.EMPTY);
+                            isCrafting = false;
+                        }
+                    //}
+                }
+            }
         }
     }
 
@@ -59,11 +82,35 @@ public class TileInfuser extends TileEntity implements ITickable, IFluidHandler,
                 itemHandler.insertItem(i, itemAdd, false);
                 if(player == null || !player.capabilities.isCreativeMode) {
                     heldItem.shrink(heldItem.getCount());
+                    markDirty();
                 }
                 break;
             }
         }
         return true;
+    }
+
+    public void attemptCraft() {
+        if (world.isRemote) {
+            return;
+        }
+        RecipeInfuser recipe = RecipeInfuser.getRecipe(inputTank, itemHandler.getStackInSlot(0));
+        if (recipe != null && canCraft()) {
+            this.isCrafting = true;
+            markDirty();
+        }
+    }
+
+    public boolean canCraft() {
+        if(outputTank.getFluid().amount > 0) {
+            return false;
+        } else if (inputTank.getFluid().amount <= 0) {
+            return false;
+        } else if (itemHandler.getStackInSlot(0).isEmpty()) {
+            return false;
+        } else {
+            return true;
+        }
     }
 
     @Override

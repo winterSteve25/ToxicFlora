@@ -6,6 +6,7 @@ import wintersteve25.toxicflora.common.block.BlocksTF;
 import wintersteve25.toxicflora.common.block.flowers.BlockShadeShroom;
 import wintersteve25.toxicflora.common.block.machines.infuser.BlockInfuser;
 import wintersteve25.toxicflora.common.block.machines.infuser.TileInfuser;
+import wintersteve25.toxicflora.common.crafting.recipes.ModInfuserRecipe;
 import wintersteve25.toxicflora.common.item.tools.ItemFluidJar;
 import net.minecraft.block.Block;
 import net.minecraft.item.Item;
@@ -26,6 +27,7 @@ public class CommonProxy {
     }
 
     public void init(FMLInitializationEvent e) {
+        ModInfuserRecipe.init();
     }
 
     public void postInit(FMLPostInitializationEvent e) {

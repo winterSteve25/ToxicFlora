@@ -1,5 +1,6 @@
 package wintersteve25.toxicflora.common.block.machines.infuser;
 
+import net.minecraft.client.renderer.EnumFaceDirection;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.InventoryHelper;
@@ -73,6 +74,10 @@ public class BlockInfuser extends Block implements ITileEntityProvider {
     public void addCollisionBoxToList(IBlockState state, World worldIn, BlockPos pos, AxisAlignedBB entityBox, List<AxisAlignedBB> collidingBoxes, @Nullable Entity entityIn, boolean isActualState) {
         super.addCollisionBoxToList(pos, entityBox, collidingBoxes, INFUSERHITBOX);
     }
+    @Override
+    public boolean canConnectRedstone(IBlockState state, IBlockAccess world, BlockPos pos, @Nullable EnumFacing side) {
+        return true;
+    }
 
     @Nullable
     @Override
@@ -117,5 +122,18 @@ public class BlockInfuser extends Block implements ITileEntityProvider {
             }
         }
         super.breakBlock(worldIn, pos, state);
+    }
+
+    @Override
+    public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos fromPos) {
+        if (!worldIn.isRemote) {
+            if(worldIn.isBlockPowered(pos)) {
+                TileEntity tile = worldIn.getTileEntity(pos);
+                if (tile instanceof TileInfuser) {
+                    TileInfuser tileInfuser = ((TileInfuser) tile);
+                    tileInfuser.attemptCraft();
+                }
+            }
+        }
     }
 }

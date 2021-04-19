@@ -5,7 +5,11 @@ import wintersteve25.toxicflora.ToxicFlora;
 
 @Config(modid = ToxicFlora.MODID, category = "infuser")
 public class InfuserConfig {
-    @Config.Comment({"This config is used for changing the default minimum amount of vitality for crafts for infuser"})
+    @Config.Comment({"This value will be used as default minimum vitality required for crafts that did not specify the minimum vitality amount"})
     @Config.RequiresMcRestart
     public static int defaultMinVitality = 200;
+
+    @Config.Comment({"This value will be used as default processing speed(ticks) required for crafts that did not specify the processing speed"})
+    @Config.RequiresMcRestart
+    public static int defaultProcessSpeed = 200;
 }
