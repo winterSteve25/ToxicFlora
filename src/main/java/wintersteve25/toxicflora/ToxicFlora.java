@@ -1,5 +1,3 @@
-//main file for the mod, it structures the mod
-
 package wintersteve25.toxicflora;
 
 import org.apache.logging.log4j.LogManager;
@@ -19,7 +17,7 @@ import org.apache.logging.log4j.Logger;
 public class ToxicFlora {
     public static final String MODID = "toxicflora";
     public static final String NAME = "Toxic Flora";
-    public static final String VERSION = "1.0.0";
+    public static final String VERSION = "1.0.1";
 
     @SidedProxy(clientSide = "wintersteve25.toxicflora.client.proxy.ClientProxy", serverSide = "wintersteve25.toxicflora.common.proxy.ServerProxy")
     public static CommonProxy proxy;

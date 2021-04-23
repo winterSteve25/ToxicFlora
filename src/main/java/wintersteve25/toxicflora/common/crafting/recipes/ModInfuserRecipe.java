@@ -10,6 +10,6 @@ public class ModInfuserRecipe {
     public static RecipeInfuser recipeTest;
 
     public static void init() {
-        recipeTest = RecipeInfuser.addRecipe(new ItemStack(ItemsTF.ToxicIngot, 1), new FluidStack(FluidRegistry.WATER, 250), new FluidStack(FluidRegistry.LAVA, 250), 0, 0);
+        recipeTest = RecipeInfuser.addRecipe(new ItemStack(ItemsTF.ToxicIngot, 1), new FluidStack(FluidRegistry.WATER, 250), new FluidStack(FluidRegistry.LAVA, 250));
     }
 }

@@ -30,9 +30,10 @@ public class TileInfuser extends TileEntity implements ITickable, IFluidHandler,
         }
     };
     private boolean isCrafting = false;
+    private int progress;
     private FluidStack inputFluidContent = null;
     private FluidStack outputFluidContent = null;
-    private int capacity = Fluid.BUCKET_VOLUME*4;
+    private final int capacity = Fluid.BUCKET_VOLUME*4;
     public final FluidTank inputTank = new FluidTank(capacity);
     public final FluidTank outputTank = new FluidTank(capacity);
     private IFluidTankProperties[] tankProperties;
@@ -41,29 +42,18 @@ public class TileInfuser extends TileEntity implements ITickable, IFluidHandler,
 
     @Override
     public void update() {
-        if (world.isRemote) {
-            return;
-        }
-
         if (!world.isRemote) {
-            if(inputTank.getFluid() != null) {
-                if (!itemHandler.getStackInSlot(0).isEmpty()) {
-                    //if (isCrafting) {
-                        outputFluidContent = null;
-                        RecipeInfuser recipe = RecipeInfuser.getRecipe(inputTank, itemHandler.getStackInSlot(0));
-                        if (recipe == null) {
-                            isCrafting = false;
-                            return;
-                        } else if (recipe != null) {
-                            ToxicFlora.getLogger().info("TileInfuser Should be start crafting");
-                            outputFluidContent = recipe.getFluidOutput().copy();
-                            outputTank.setFluid(outputFluidContent);
-                            inputFluidContent = null;
-                            inputTank.drain(recipe.getFluidInput().amount, true);
-                            itemHandler.setStackInSlot(0, ItemStack.EMPTY);
-                            isCrafting = false;
-                        }
-                    //}
+            if (isCrafting) {
+                ItemStack itemStack = itemHandler.getStackInSlot(0);
+                RecipeInfuser recipe = RecipeInfuser.getRecipe(inputTank, itemStack);
+                if (recipe != null) {
+                    ToxicFlora.getLogger().info("TileInfuser Should be start crafting");
+                    outputFluidContent = RecipeInfuser.getFluidOutput(inputTank, itemStack).copy();
+                    outputTank.setFluid(outputFluidContent);
+                    inputFluidContent = null;
+                    inputTank.drain(recipe.getFluidInput(), true);
+                    itemHandler.setStackInSlot(0, ItemStack.EMPTY);
+                    isCrafting = false;
                 }
             }
         }
@@ -91,25 +81,12 @@ public class TileInfuser extends TileEntity implements ITickable, IFluidHandler,
     }
 
     public void attemptCraft() {
-        if (world.isRemote) {
-            return;
-        }
-        RecipeInfuser recipe = RecipeInfuser.getRecipe(inputTank, itemHandler.getStackInSlot(0));
-        if (recipe != null && canCraft()) {
-            this.isCrafting = true;
-            markDirty();
-        }
-    }
-
-    public boolean canCraft() {
-        if(outputTank.getFluid().amount > 0) {
-            return false;
-        } else if (inputTank.getFluid().amount <= 0) {
-            return false;
-        } else if (itemHandler.getStackInSlot(0).isEmpty()) {
-            return false;
-        } else {
-            return true;
+        if (!world.isRemote) {
+            RecipeInfuser recipe = RecipeInfuser.getRecipe(inputTank, itemHandler.getStackInSlot(0));
+            if (recipe != null) {
+                this.isCrafting = true;
+                markDirty();
+            }
         }
     }
 
@@ -185,9 +162,16 @@ public class TileInfuser extends TileEntity implements ITickable, IFluidHandler,
             return CapabilityItemHandler.ITEM_HANDLER_CAPABILITY.cast(itemHandler);
         }
         if (capability == CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY) {
-            return CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY.cast(inputTank);
-        }
-
+            } else if (facing == EnumFacing.DOWN) {
+                return CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY.cast(outputTank);
+            } else if (facing == EnumFacing.UP) {
+                return CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY.cast(inputTank);
+            } else {
+                if (outputTank.getFluid() != null) {
+                    return CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY.cast(outputTank);
+                }
+                return CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY.cast(inputTank);
+            }
         return super.getCapability(capability, facing);
     }
 
@@ -250,12 +234,8 @@ public class TileInfuser extends TileEntity implements ITickable, IFluidHandler,
     @Nullable
     @Override
     public FluidStack drain(FluidStack resource, boolean doDrain) {
-        if (!canDrainFluidType(getOutputFluid())) {
+        if (!canDrainFluidType(getFluid())) {
             return null;
-        } else if (!canDrainFluidType(getFluid())) {
-            return null;
-        } else if (canDrainFluidType(getOutputFluid())) {
-            return drainInternal(resource, doDrain);
         }
         return drainInternal(resource, doDrain);
     }
@@ -263,13 +243,8 @@ public class TileInfuser extends TileEntity implements ITickable, IFluidHandler,
     @Nullable
     public FluidStack drainInternal(FluidStack resource, boolean doDrain)
     {
-
-        if (resource == null || !resource.isFluidEqual(getOutputFluid())) {
+        if (resource == null || !resource.isFluidEqual(getFluid())) {
             return null;
-        } else if (resource == null || !resource.isFluidEqual(getFluid())) {
-            return null;
-        } else if (resource.isFluidEqual(getOutputFluid())) {
-            return drainInternal(resource.amount, doDrain);
         }
         return drainInternal(resource.amount, doDrain);
     }
@@ -277,12 +252,8 @@ public class TileInfuser extends TileEntity implements ITickable, IFluidHandler,
     @Nullable
     @Override
     public FluidStack drain(int maxDrain, boolean doDrain) {
-        if (!canDrainFluidType(outputFluidContent)) {
+        if (!canDrainFluidType(inputFluidContent)) {
             return null;
-        } else if (!canDrainFluidType(inputFluidContent)) {
-            return null;
-        } else if (canDrainFluidType(outputFluidContent)) {
-            return drainInternal(maxDrain, doDrain);
         }
         return drainInternal(maxDrain, doDrain);
     }
@@ -291,33 +262,7 @@ public class TileInfuser extends TileEntity implements ITickable, IFluidHandler,
     public FluidStack drainInternal(int maxDrain, boolean doDrain)
     {
         TileInfuser tile = new TileInfuser();
-        if (outputFluidContent != null) {
-            int drained = maxDrain;
-            if (outputFluidContent.amount < drained)
-            {
-                drained = outputFluidContent.amount;
-            }
-
-            FluidStack stack = new FluidStack(outputFluidContent, drained);
-            if (doDrain)
-            {
-                outputFluidContent.amount -= drained;
-                if (outputFluidContent.amount <= 0)
-                {
-                    outputFluidContent = null;
-                }
-
-                onContentsChanged();
-
-                if (tile != null)
-                {
-                    FluidEvent.fireEvent(new FluidEvent.FluidDrainingEvent(outputFluidContent, tile.getWorld(), tile.getPos(), this, drained));
-                }
-            }
-            return stack;
-        } else if (outputFluidContent == null) {
-            return null;
-        } else if (inputFluidContent == null || maxDrain <= 0) {
+        if (inputFluidContent == null || maxDrain <= 0) {
             return null;
         }
         int drained = maxDrain;

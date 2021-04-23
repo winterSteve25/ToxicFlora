@@ -19,7 +19,6 @@ public class RecipeInfuser extends RecipeBaseSimple{
     public static final List<RecipeInfuser> recipesInfuser = new ArrayList<RecipeInfuser>();
 
     public RecipeInfuser(Object itemInput, FluidStack input, FluidStack output, int processTime, int minVitality) {
-        this.itemInput = itemInput;
         this.input = input;
         this.output = output;
         this.processTime = processTime;
@@ -38,7 +37,6 @@ public class RecipeInfuser extends RecipeBaseSimple{
     }
 
     public RecipeInfuser(Object itemInput, FluidStack input, FluidStack output, int processTime) {
-        this.itemInput = itemInput;
         this.input = input;
         this.output = output;
         this.processTime = processTime;
@@ -57,7 +55,6 @@ public class RecipeInfuser extends RecipeBaseSimple{
     }
 
     public RecipeInfuser(Object itemInput, FluidStack input, FluidStack output) {
-        this.itemInput = itemInput;
         this.input = input;
         this.output = output;
         this.processTime = InfuserConfig.defaultProcessSpeed;
@@ -75,51 +72,76 @@ public class RecipeInfuser extends RecipeBaseSimple{
         }
     }
 
-    /*
-        This is having issue i think
-     */
-    public boolean isRecipeMatch(IFluidTank tankInput, ItemStack itemInput) {
+    public boolean isRecipeMatch(IFluidTank tankInput, Object itemInput) {
         if (tankInput.getFluid() == null || !tankInput.getFluid().isFluidEqual(getFluidInput())) {
             return false;
-        } else if (tankInput.getFluid().amount < getFluidInput().amount) {
+        }
+        if (tankInput.getFluid().amount < getFluidInput().amount) {
             return false;
-        } else if (itemInput.isEmpty()) {
-            return false;
-        } else if (itemInput.getCount() < ((ItemStack) this.itemInput).getCount()) {
-            return false;
-        } else if (itemInput == this.itemInput && tankInput.getFluid() == this.input) {
-            return true;
+        }
+        if (itemInput instanceof ItemStack) {
+            ItemStack itemStack = ((ItemStack) itemInput);
+            return areStacksTheSame((ItemStack) (getItemInput()), itemStack, true);
+        } else if (itemInput instanceof String) {
+            List<ItemStack> list = OreDictionary.getOres((String) itemInput);
+            for (ItemStack stack : list) {
+                return areStacksTheSame((ItemStack) (getItemInput()), stack, true);
+            }
         }
         return false;
     }
 
-    public static RecipeInfuser addRecipe(ItemStack inputItem, FluidStack inputFluid, FluidStack outputFluid, int processTime, int minVitality) {
+    //This method is copied from primal tech WoodenBasinRecipe.java, coded by vadis365, full credits to them. Download PrimalTech here:https://www.curseforge.com/minecraft/mc-mods/primal-tech
+    public static boolean areStacksTheSame(ItemStack stack1, ItemStack stack2, boolean matchSize) {
+        if (stack1.isEmpty() && !stack2.isEmpty() || !stack1.isEmpty() && stack2.isEmpty())
+            return false;
+
+        if (stack1.getItem() == stack2.getItem())
+            if (stack1.getItemDamage() == stack2.getItemDamage() || isWildcard(stack1.getItemDamage()) || isWildcard(stack2.getItemDamage()))
+                if (!matchSize || stack1.getCount() == stack2.getCount()) {
+                    if (stack1.hasTagCompound() && stack2.hasTagCompound())
+                        return stack1.getTagCompound().equals(stack2.getTagCompound());
+                    return stack1.hasTagCompound() == stack2.hasTagCompound();
+                }
+        return false;
+    }
+
+    public static RecipeInfuser addRecipe(Object inputItem, FluidStack inputFluid, FluidStack outputFluid, int processTime, int minVitality) {
         RecipeInfuser recipe = new RecipeInfuser(inputItem, inputFluid, outputFluid, processTime, minVitality);
         recipesInfuser.add(recipe);
         return recipe;
     }
 
-    public static void addRecipe(ItemStack inputItem, FluidStack inputFluid, FluidStack outputFluid, int processTime) {
+    public static RecipeInfuser addRecipe(Object inputItem, FluidStack inputFluid, FluidStack outputFluid, int processTime) {
+        RecipeInfuser recipe = new RecipeInfuser(inputItem, inputFluid, outputFluid, processTime);
         recipesInfuser.add(new RecipeInfuser(inputItem, inputFluid, outputFluid, processTime));
+        return recipe;
     }
 
-    public static void addRecipe(ItemStack inputItem, FluidStack inputFluid, FluidStack outputFluid) {
+    public static RecipeInfuser addRecipe(Object inputItem, FluidStack inputFluid, FluidStack outputFluid) {
+        RecipeInfuser recipe = new RecipeInfuser(inputItem, inputFluid, outputFluid);
         recipesInfuser.add(new RecipeInfuser(inputItem, inputFluid, outputFluid));
+        return recipe;
     }
 
-    public static FluidStack getFluidOutput(IFluidTank tank, ItemStack item) {
+    public static FluidStack getFluidOutput(IFluidTank tank, Object item) {
         RecipeInfuser recipeInfuser = getRecipe(tank, item);
         FluidStack fluidStack = recipeInfuser != null ? recipeInfuser.getFluidOutput() : null;
         return fluidStack;
     }
 
-    public static RecipeInfuser getRecipe(IFluidTank tank, ItemStack item) {
+    public static RecipeInfuser getRecipe(IFluidTank tank, Object item) {
         for (RecipeInfuser recipes : recipesInfuser) {
             if(recipes.isRecipeMatch(tank, item)) {
                 return recipes;
             }
         }
         return null;
+    }
+
+    //this method is also from primal tech
+    private static boolean isWildcard(int meta) {
+        return meta == OreDictionary.WILDCARD_VALUE;
     }
 
     @Override
