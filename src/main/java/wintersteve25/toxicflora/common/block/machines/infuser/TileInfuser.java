@@ -52,20 +52,25 @@ public class TileInfuser extends TileEntity implements ITickable, IFluidHandler,
                         remainingTicks--;
                         markDirty();
                         ToxicFlora.getLogger().info(remainingTicks);
+                        if (itemStack.isEmpty() || inputTank.getFluid() == null) {
+                            remainingTicks = 0;
+                            isCrafting = false;
+                            markDirty();
+                        }
                         if (remainingTicks <= 0) {
                             ToxicFlora.getLogger().info("Infuser Craft completed");
                             outputFluidContent = RecipeInfuser.getFluidOutput(inputTank, itemStack).copy();
-                            outputTank.setFluid(outputFluidContent);
+                            outputTank.fill(outputFluidContent, true);
                             inputFluidContent = null;
                             inputTank.drain(recipe.getFluidInput(), true);
                             itemHandler.extractItem(0, 1, false);
                             isCrafting = false;
-                            remainingTicks = totalTicks;
+                            remainingTicks = 0;
                             markDirty();
 
                         }
                     } else {
-                        if (outputTank.getFluid() != null || outputTank.getFluid().isFluidEqual(recipe.getFluidOutput())) {
+                        if (outputTank.getFluid() != null || outputTank.getFluid().containsFluid(recipe.getFluidOutput())) {
                             totalTicks = recipe.getProcessTime();
                             remainingTicks = totalTicks;
                             markDirty();

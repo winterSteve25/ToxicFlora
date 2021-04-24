@@ -81,11 +81,11 @@ public class RecipeInfuser extends RecipeBaseSimple{
         }
         if (itemInput instanceof ItemStack) {
             ItemStack itemStack = ((ItemStack) itemInput);
-            return areStacksTheSame((ItemStack) (getItemInput()), itemStack, true);
+            return areStacksTheSame((ItemStack) (getItemInput()), itemStack, false);
         } else if (itemInput instanceof String) {
             List<ItemStack> list = OreDictionary.getOres((String) itemInput);
             for (ItemStack stack : list) {
-                return areStacksTheSame((ItemStack) (getItemInput()), stack, true);
+                return areStacksTheSame((ItemStack) (getItemInput()), stack, false);
             }
         }
         return false;
