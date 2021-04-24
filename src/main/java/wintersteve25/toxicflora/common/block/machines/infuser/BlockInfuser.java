@@ -131,7 +131,7 @@ public class BlockInfuser extends Block implements ITileEntityProvider {
                 TileEntity tile = worldIn.getTileEntity(pos);
                 if (tile instanceof TileInfuser) {
                     TileInfuser tileInfuser = ((TileInfuser) tile);
-                    tileInfuser.attemptCraft();
+                    tileInfuser.tryStartCraft();
                 }
             }
         }

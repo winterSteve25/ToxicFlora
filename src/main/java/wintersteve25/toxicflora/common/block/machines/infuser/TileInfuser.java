@@ -29,16 +29,17 @@ public class TileInfuser extends TileEntity implements ITickable, IFluidHandler,
             TileInfuser.this.markDirty();
         }
     };
-    private boolean isCrafting = false;
-    private int progress;
-    private FluidStack inputFluidContent = null;
-    private FluidStack outputFluidContent = null;
-    private final int capacity = Fluid.BUCKET_VOLUME*4;
-    public final FluidTank inputTank = new FluidTank(capacity);
-    public final FluidTank outputTank = new FluidTank(capacity);
-    private IFluidTankProperties[] tankProperties;
-    private boolean canFill = true;
-    private boolean canDrain = true;
+    private static boolean isCrafting = false;
+    public static int totalTicks = 0;
+    private static int remainingTicks = 0;
+    private static FluidStack inputFluidContent = null;
+    private static FluidStack outputFluidContent = null;
+    private static final int capacity = Fluid.BUCKET_VOLUME*4;
+    public static final FluidTank inputTank = new FluidTank(capacity);
+    public static final FluidTank outputTank = new FluidTank(capacity);
+    private static IFluidTankProperties[] tankProperties;
+    private static boolean canFill = true;
+    private static boolean canDrain = true;
 
     @Override
     public void update() {
@@ -47,13 +48,24 @@ public class TileInfuser extends TileEntity implements ITickable, IFluidHandler,
                 ItemStack itemStack = itemHandler.getStackInSlot(0);
                 RecipeInfuser recipe = RecipeInfuser.getRecipe(inputTank, itemStack);
                 if (recipe != null) {
-                    ToxicFlora.getLogger().info("TileInfuser Should be start crafting");
-                    outputFluidContent = RecipeInfuser.getFluidOutput(inputTank, itemStack).copy();
-                    outputTank.setFluid(outputFluidContent);
-                    inputFluidContent = null;
-                    inputTank.drain(recipe.getFluidInput(), true);
-                    itemHandler.setStackInSlot(0, ItemStack.EMPTY);
-                    isCrafting = false;
+                    if (outputTank != null || outputTank.getFluid().isFluidEqual(recipe.getFluidOutput())) {
+                        totalTicks = recipe.getProcessTime();
+                        remainingTicks = totalTicks;
+                        remainingTicks--;
+                        ToxicFlora.getLogger().info(remainingTicks);
+                        markDirty();
+                        if (remainingTicks <= 0) {
+                            ToxicFlora.getLogger().info("Infuser Craft completed");
+                            outputFluidContent = RecipeInfuser.getFluidOutput(inputTank, itemStack).copy();
+                            outputTank.setFluid(outputFluidContent);
+                            inputFluidContent = null;
+                            inputTank.drain(recipe.getFluidInput(), true);
+                            itemHandler.extractItem(0, 1, false);
+                            isCrafting = false;
+                            remainingTicks = totalTicks;
+                            markDirty();
+                        }
+                    }
                 }
             }
         }
@@ -80,13 +92,10 @@ public class TileInfuser extends TileEntity implements ITickable, IFluidHandler,
         return true;
     }
 
-    public void attemptCraft() {
+    public void tryStartCraft() {
         if (!world.isRemote) {
-            RecipeInfuser recipe = RecipeInfuser.getRecipe(inputTank, itemHandler.getStackInSlot(0));
-            if (recipe != null) {
                 this.isCrafting = true;
                 markDirty();
-            }
         }
     }
 
@@ -96,6 +105,8 @@ public class TileInfuser extends TileEntity implements ITickable, IFluidHandler,
         compound.setTag("items", itemHandler.serializeNBT());
         inputTank.writeToNBT(compound);
         outputTank.writeToNBT(compound);
+
+        compound.setInteger("progress", remainingTicks);
         return compound;
     }
 
@@ -110,6 +121,8 @@ public class TileInfuser extends TileEntity implements ITickable, IFluidHandler,
 
         outputTank.readFromNBT(compound);
         outputFluidContent = FluidStack.loadFluidStackFromNBT(compound);
+
+        remainingTicks = compound.getInteger("progress");
     }
 
     @Override
