@@ -48,12 +48,10 @@ public class TileInfuser extends TileEntity implements ITickable, IFluidHandler,
                 ItemStack itemStack = itemHandler.getStackInSlot(0);
                 RecipeInfuser recipe = RecipeInfuser.getRecipe(inputTank, itemStack);
                 if (recipe != null) {
-                    if (outputTank != null || outputTank.getFluid().isFluidEqual(recipe.getFluidOutput())) {
-                        totalTicks = recipe.getProcessTime();
-                        remainingTicks = totalTicks;
+                    if (remainingTicks > 0) {
                         remainingTicks--;
-                        ToxicFlora.getLogger().info(remainingTicks);
                         markDirty();
+                        ToxicFlora.getLogger().info(remainingTicks);
                         if (remainingTicks <= 0) {
                             ToxicFlora.getLogger().info("Infuser Craft completed");
                             outputFluidContent = RecipeInfuser.getFluidOutput(inputTank, itemStack).copy();
@@ -64,6 +62,13 @@ public class TileInfuser extends TileEntity implements ITickable, IFluidHandler,
                             isCrafting = false;
                             remainingTicks = totalTicks;
                             markDirty();
+
+                        }
+                    } else {
+                        if (outputTank.getFluid() != null || outputTank.getFluid().isFluidEqual(recipe.getFluidOutput())) {
+                            totalTicks = recipe.getProcessTime();
+                            remainingTicks = totalTicks;
+                            markDirty();
                         }
                     }
                 }
@@ -72,23 +77,21 @@ public class TileInfuser extends TileEntity implements ITickable, IFluidHandler,
     }
 
     public boolean addItem(@Nullable EntityPlayer player, ItemStack heldItem, @Nullable EnumHand hand) {
-        for (int i = 0; i < 1; i++) {
-            if (!itemHandler.getStackInSlot(i).isEmpty()) {
+            if (!itemHandler.getStackInSlot(0).isEmpty()) {
                 return false;
             }
             if (isCrafting == true) {
                 return false;
             }
-            if (itemHandler.getStackInSlot(i).isEmpty()) {
+            if (itemHandler.getStackInSlot(0).isEmpty()) {
                 ItemStack itemAdd = heldItem.copy();
-                itemHandler.insertItem(i, itemAdd, false);
+                itemHandler.insertItem(0, itemAdd, false);
                 if(player == null || !player.capabilities.isCreativeMode) {
                     heldItem.shrink(heldItem.getCount());
-                    markDirty();
+
                 }
-                break;
+                markDirty();
             }
-        }
         return true;
     }
 
