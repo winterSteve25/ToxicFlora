@@ -162,7 +162,7 @@ public class TileInfuser extends TileEntity implements ITickable, IFluidHandler,
             return CapabilityItemHandler.ITEM_HANDLER_CAPABILITY.cast(itemHandler);
         }
         if (capability == CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY) {
-            } else if (facing == EnumFacing.DOWN) {
+            if (facing == EnumFacing.DOWN) {
                 return CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY.cast(outputTank);
             } else if (facing == EnumFacing.UP) {
                 return CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY.cast(inputTank);
@@ -172,6 +172,7 @@ public class TileInfuser extends TileEntity implements ITickable, IFluidHandler,
                 }
                 return CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY.cast(inputTank);
             }
+        }
         return super.getCapability(capability, facing);
     }
 
