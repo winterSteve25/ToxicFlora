@@ -27,7 +27,6 @@ public class CommonProxy {
     }
 
     public void init(FMLInitializationEvent e) {
-        ModInfuserRecipe.init();
     }
 
     public void postInit(FMLPostInitializationEvent e) {

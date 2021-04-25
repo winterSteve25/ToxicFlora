@@ -21,16 +21,34 @@ public class CompatInfuserJEIWrapper implements IRecipeWrapper {
 
     public CompatInfuserJEIWrapper(RecipeInfuser recipe) {
         this.itemInput = Collections.singletonList(((ItemStack) recipe.getItemInput()).copy());
-        this.input = recipe.getFluidInput();
-        this.output = recipe.getFluidOutput();
+        this.input = recipe.getFluidInput().copy();
+        this.output = recipe.getFluidOutput().copy();
         this.processTime = recipe.getProcessTime();
         this.minVitality = recipe.getMinVitality();
     }
 
     @Override
     public void getIngredients(IIngredients ingredients) {
-        ingredients.setInput(ItemStack.class, itemInput);
-        ingredients.setInput(FluidStack.class, input);
-        ingredients.setOutput(FluidStack.class, output);
+        if (!itemInput.isEmpty()) {
+            ingredients.setInput(ItemStack.class, itemInput);
+        }
+        if (input.getFluid() != null) {
+            ingredients.setInput(FluidStack.class, input);
+        }
+        if (output.getFluid() != null) {
+            ingredients.setOutput(FluidStack.class, output);
+        }
+    }
+
+    public FluidStack getInput() {
+        return input;
+    }
+
+    public FluidStack getOutput() {
+        return output;
+    }
+
+    public List<ItemStack> getItemInput() {
+        return itemInput;
     }
 }

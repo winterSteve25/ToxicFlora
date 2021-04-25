@@ -11,7 +11,6 @@ import javax.annotation.Nonnull;
 
 @JEIPlugin
 public class ToxicFloraJEIPlugin implements IModPlugin {
-    public static IJeiHelpers jeiHelper;
 
     public static final String InfuserIDJEICompatID = "toxicflora.infuser";
 
@@ -22,6 +21,8 @@ public class ToxicFloraJEIPlugin implements IModPlugin {
 
     @Override
     public void registerCategories(IRecipeCategoryRegistration registry) {
-        registry.addRecipeCategories(new CompatInfuserJEICategory());
+        IJeiHelpers jeiHelper = registry.getJeiHelpers();
+        IGuiHelper iGuiHelper = jeiHelper.getGuiHelper();
+        registry.addRecipeCategories(new CompatInfuserJEICategory(iGuiHelper));
     }
 }

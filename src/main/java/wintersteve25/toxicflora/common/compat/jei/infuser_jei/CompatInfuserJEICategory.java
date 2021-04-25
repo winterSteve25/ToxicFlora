@@ -1,28 +1,33 @@
 package wintersteve25.toxicflora.common.compat.jei.infuser_jei;
 
+import mezz.jei.api.IGuiHelper;
 import mezz.jei.api.gui.IDrawable;
 import mezz.jei.api.gui.IGuiFluidStackGroup;
 import mezz.jei.api.gui.IGuiItemStackGroup;
 import mezz.jei.api.gui.IRecipeLayout;
 import mezz.jei.api.ingredients.IIngredients;
-import mezz.jei.api.ingredients.VanillaTypes;
 import mezz.jei.api.recipe.IRecipeCategory;
-import net.minecraft.item.ItemStack;
+import net.minecraft.client.Minecraft;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fluids.Fluid;
-import net.minecraftforge.fluids.FluidStack;
 import wintersteve25.toxicflora.ToxicFlora;
-import wintersteve25.toxicflora.common.compat.jei.ToxicFloraJEIPlugin;
 
-import javax.annotation.Nonnull;
 import java.util.List;
 
 import static wintersteve25.toxicflora.common.compat.jei.ToxicFloraJEIPlugin.InfuserIDJEICompatID;
 
 public class CompatInfuserJEICategory implements IRecipeCategory<CompatInfuserJEIWrapper> {
 
-    @Nonnull
-    private final IDrawable background = ToxicFloraJEIPlugin.jeiHelper.getGuiHelper().createDrawable(new ResourceLocation(ToxicFlora.MODID + "gui/infuser_jei.png"), 7, 7, 116, 57);
+    private final IDrawable background;
+    private final IDrawable tankOverlay;
+
+    public CompatInfuserJEICategory(IGuiHelper iGuiHelper) {
+        ResourceLocation backgroundLocation = new ResourceLocation( "toxicflora:textures/gui/infuser_jei.png");
+        background = iGuiHelper.createDrawable(backgroundLocation, 0, 0, 142, 71);
+
+        ResourceLocation tankLocation = new ResourceLocation("toxicflora:textures/gui/fluid_bar_four.png");
+        tankOverlay = iGuiHelper.createDrawable(tankLocation, 0, 0, 18, 64, 18, 64);
+    }
 
     @Override
     public String getUid() {
@@ -49,16 +54,19 @@ public class CompatInfuserJEICategory implements IRecipeCategory<CompatInfuserJE
         IGuiItemStackGroup guiItemStackGroup = recipeLayout.getItemStacks();
         IGuiFluidStackGroup guiFluidStackGroup = recipeLayout.getFluidStacks();
 
-        guiItemStackGroup.init(0, true, 7, 7);
-        guiFluidStackGroup.init(1, true, 58, 7, 14, 14, Fluid.BUCKET_VOLUME*4, true, null);
-        guiFluidStackGroup.init(2, false, 103, 35, 20, 20, Fluid.BUCKET_VOLUME*4, true, null);
+        guiItemStackGroup.init(0, true, 52, 4);
+        guiItemStackGroup.set(0, recipeWrapper.getItemInput());
 
-        List<ItemStack> inputItem = ingredients.getInputs(VanillaTypes.ITEM).get(0);
-        List<FluidStack> input = ingredients.getInputs(VanillaTypes.FLUID).get(1);
-        List<FluidStack> output = ingredients.getOutputs(VanillaTypes.FLUID).get(2);
+        guiFluidStackGroup.init(0, true, 4, 5, 18, 63, Fluid.BUCKET_VOLUME*4, true, null);
+        guiFluidStackGroup.set(0, recipeWrapper.getInput());
 
-        guiItemStackGroup.set(0, inputItem);
-        guiFluidStackGroup.set(1, input);
-        guiFluidStackGroup.set(2, output);
+        guiFluidStackGroup.init(1, false, 121, 5, 19, 63, Fluid.BUCKET_VOLUME*4, true, null);
+        guiFluidStackGroup.set(1, recipeWrapper.getOutput());
+    }
+
+    @Override
+    public void drawExtras(Minecraft minecraft) {
+        tankOverlay.draw(minecraft, 3, 4);
+        tankOverlay.draw(minecraft, 120, 4);
     }
 }

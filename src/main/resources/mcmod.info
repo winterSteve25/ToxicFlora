@@ -3,7 +3,7 @@
     "modid": "toxicflora",
     "name": "Toxic Flora",
     "description": "This is a druid, magic themed mod with some machines and functions",
-    "version": "1.0.1",
+    "version": "1.0.17",
     "mcversion": "${mcversion}",
     "url": "https://www.curseforge.com/minecraft/mc-mods/toxic-flora",
     "updateUrl": "https://github.com/W1nter-isHere/ToxicFloraForge",

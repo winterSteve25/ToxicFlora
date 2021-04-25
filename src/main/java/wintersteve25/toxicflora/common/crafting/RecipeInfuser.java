@@ -72,11 +72,11 @@ public class RecipeInfuser extends RecipeBaseSimple{
         }
     }
 
-    public boolean isRecipeMatch(IFluidTank tankInput, Object itemInput) {
-        if (tankInput.getFluid() == null || !tankInput.getFluid().isFluidEqual(getFluidInput())) {
+    public boolean isRecipeMatch(FluidStack input, Object itemInput) {
+        if (input == null || !input.isFluidEqual(getFluidInput())) {
             return false;
         }
-        if (tankInput.getFluid().amount < getFluidInput().amount) {
+        if (input.amount < getFluidInput().amount) {
             return false;
         }
         if (itemInput instanceof ItemStack) {
@@ -124,15 +124,20 @@ public class RecipeInfuser extends RecipeBaseSimple{
         return recipe;
     }
 
+    public static void removeRecipe(FluidStack input, Object item) {
+        RecipeInfuser recipeToRemove = getRecipe(input, item);
+        recipesInfuser.remove(recipeToRemove);
+    }
+
     public static FluidStack getFluidOutput(IFluidTank tank, Object item) {
-        RecipeInfuser recipeInfuser = getRecipe(tank, item);
+        RecipeInfuser recipeInfuser = getRecipe(tank.getFluid(), item);
         FluidStack fluidStack = recipeInfuser != null ? recipeInfuser.getFluidOutput() : null;
         return fluidStack;
     }
 
-    public static RecipeInfuser getRecipe(IFluidTank tank, Object item) {
+    public static RecipeInfuser getRecipe(FluidStack input, Object item) {
         for (RecipeInfuser recipes : recipesInfuser) {
-            if(recipes.isRecipeMatch(tank, item)) {
+            if(recipes.isRecipeMatch(input, item)) {
                 return recipes;
             }
         }

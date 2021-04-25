@@ -46,7 +46,7 @@ public class TileInfuser extends TileEntity implements ITickable, IFluidHandler,
         if (!world.isRemote) {
             if (isCrafting) {
                 ItemStack itemStack = itemHandler.getStackInSlot(0);
-                RecipeInfuser recipe = RecipeInfuser.getRecipe(inputTank, itemStack);
+                RecipeInfuser recipe = RecipeInfuser.getRecipe(inputTank.getFluid(), itemStack);
                 if (recipe != null) {
                     if (remainingTicks > 0) {
                         remainingTicks--;

@@ -12,7 +12,7 @@ buildscript {
 }
 apply plugin: "net.minecraftforge.gradle.forge"
 
-version = "1.0.1"
+version = "1.0.17"
 group = "wintersteve25.toxicflora" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = "toxicflora"
 
@@ -59,8 +59,9 @@ dependencies {
     deobfProvided "mezz.jei:jei_1.12.2:4.16.1.302:api"
     runtime "mezz.jei:jei_1.12.2:4.16.1.302"
     deobfCompile "mcjty.theoneprobe:TheOneProbe-1.12:1.12-1.4.28-17"
-    deobfCompile 'CraftTweaker2:CraftTweaker2-MC1120-Main:1.12-4.1.20.636'
-    deobfCompile('software.bernie.geckolib:forge-1.12.2-geckolib:3.0.0-beta.7')
+    deobfCompile "CraftTweaker2:CraftTweaker2-MC1120-Main:1.12-4.1.20.636"
+    deobfCompile "software.bernie.geckolib:forge-1.12.2-geckolib:3.0.0-beta.7"
+    deobfCompile "com.blamejared:MTLib:3.0.5.15"
 }
 
 processResources {

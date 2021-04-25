@@ -21,4 +21,6 @@ item.toxicflora.compound_toxic.name=Toxic Compound
 #block
 tile.toxicflora.shadeshroom.name=Shadeshroom
 tile.toxicflora.shadow_brick.name=Shadow Brick
+
+#machines
 tile.toxicflora.infuser.name=Herbalogic Infuser
