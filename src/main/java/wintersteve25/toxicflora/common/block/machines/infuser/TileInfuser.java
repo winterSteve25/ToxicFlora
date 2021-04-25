@@ -70,10 +70,16 @@ public class TileInfuser extends TileEntity implements ITickable, IFluidHandler,
 
                         }
                     } else {
-                        if (outputTank.getFluid() != null || outputTank.getFluid().containsFluid(recipe.getFluidOutput())) {
+                        if (outputTank.getFluid() == null) {
                             totalTicks = recipe.getProcessTime();
                             remainingTicks = totalTicks;
                             markDirty();
+                        } else if (outputTank.getFluid().containsFluid(recipe.getFluidOutput())) {
+                            if (outputTank.getFluidAmount() - recipe.getFluidOutput().amount >= 0) {
+                                totalTicks = recipe.getProcessTime();
+                                remainingTicks = totalTicks;
+                                markDirty();
+                            }
                         }
                     }
                 }
