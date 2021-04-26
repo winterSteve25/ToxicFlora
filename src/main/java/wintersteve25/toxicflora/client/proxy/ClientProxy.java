@@ -1,16 +1,12 @@
 package wintersteve25.toxicflora.client.proxy;
 
-import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.client.model.ModelLoaderRegistry;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import wintersteve25.toxicflora.ToxicFlora;
 import wintersteve25.toxicflora.client.model.ModelDynJar;
-import wintersteve25.toxicflora.client.model.TileInfuserRenderer;
 import wintersteve25.toxicflora.client.particles.purple.TextureStitcherPurple;
 import wintersteve25.toxicflora.common.block.BlocksTF;
-import wintersteve25.toxicflora.common.block.machines.infuser.TileInfuser;
 import wintersteve25.toxicflora.common.item.tools.ItemFluidJar;
 import wintersteve25.toxicflora.common.proxy.CommonProxy;
 import net.minecraftforge.client.event.ModelRegistryEvent;

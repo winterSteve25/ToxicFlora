@@ -1,6 +1,9 @@
 package wintersteve25.toxicflora.common.block.machines.infuser;
 
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.SPacketUpdateTileEntity;
@@ -17,12 +20,23 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.items.CapabilityItemHandler;
+import software.bernie.geckolib3.core.AnimationState;
+import software.bernie.geckolib3.core.IAnimatable;
+import software.bernie.geckolib3.core.PlayState;
+import software.bernie.geckolib3.core.builder.AnimationBuilder;
+import software.bernie.geckolib3.core.controller.AnimationController;
+import software.bernie.geckolib3.core.event.SoundKeyframeEvent;
+import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
+import software.bernie.geckolib3.core.manager.AnimationData;
+import software.bernie.geckolib3.core.manager.AnimationFactory;
+import software.bernie.geckolib3.util.GeckoLibUtil;
 import wintersteve25.toxicflora.ToxicFlora;
+import wintersteve25.toxicflora.client.proxy.SoundProxy;
 import wintersteve25.toxicflora.common.crafting.RecipeInfuser;
 
 import javax.annotation.Nullable;
 
-public class TileInfuser extends TileEntity implements ITickable, IFluidHandler, IFluidTank {
+public class TileInfuser extends TileEntity implements ITickable, IFluidHandler, IFluidTank, IAnimatable {
     private final ItemStackHandler itemHandler = new ItemStackHandler(1) {
         @Override
         protected void onContentsChanged(int slot) {
@@ -40,6 +54,10 @@ public class TileInfuser extends TileEntity implements ITickable, IFluidHandler,
     private static IFluidTankProperties[] tankProperties;
     private static boolean canFill = true;
     private static boolean canDrain = true;
+
+    private BlockInfuser blockInfuser;
+    private final AnimationFactory factory = new AnimationFactory(this);
+    private String controllerName = "infuser_controller";
 
     @Override
     public void update() {
@@ -88,28 +106,28 @@ public class TileInfuser extends TileEntity implements ITickable, IFluidHandler,
     }
 
     public boolean addItem(@Nullable EntityPlayer player, ItemStack heldItem, @Nullable EnumHand hand) {
-            if (!itemHandler.getStackInSlot(0).isEmpty()) {
-                return false;
-            }
-            if (isCrafting == true) {
-                return false;
-            }
-            if (itemHandler.getStackInSlot(0).isEmpty()) {
-                ItemStack itemAdd = heldItem.copy();
-                itemHandler.insertItem(0, itemAdd, false);
-                if(player == null || !player.capabilities.isCreativeMode) {
-                    heldItem.shrink(heldItem.getCount());
+        if (!itemHandler.getStackInSlot(0).isEmpty()) {
+            return false;
+        }
+        if (isCrafting == true) {
+            return false;
+        }
+        if (itemHandler.getStackInSlot(0).isEmpty()) {
+            ItemStack itemAdd = heldItem.copy();
+            itemHandler.insertItem(0, itemAdd, false);
+            if(player == null || !player.capabilities.isCreativeMode) {
+                heldItem.shrink(heldItem.getCount());
 
-                }
-                markDirty();
             }
+            markDirty();
+        }
         return true;
     }
 
     public void tryStartCraft() {
         if (!world.isRemote) {
-                this.isCrafting = true;
-                markDirty();
+            this.isCrafting = true;
+            markDirty();
         }
     }
 
@@ -121,6 +139,7 @@ public class TileInfuser extends TileEntity implements ITickable, IFluidHandler,
         outputTank.writeToNBT(compound);
 
         compound.setInteger("progress", remainingTicks);
+        compound.setBoolean("isCrafting", isCrafting);
         return compound;
     }
 
@@ -137,42 +156,11 @@ public class TileInfuser extends TileEntity implements ITickable, IFluidHandler,
         outputFluidContent = FluidStack.loadFluidStackFromNBT(compound);
 
         remainingTicks = compound.getInteger("progress");
-    }
-
-    @Override
-    public SPacketUpdateTileEntity getUpdatePacket() {
-        NBTTagCompound nbt = new NBTTagCompound();
-        this.writeToNBT(nbt);
-        int metadata = getBlockMetadata();
-        return new SPacketUpdateTileEntity(this.pos, metadata, nbt);
-    }
-
-    @Override
-    public void onDataPacket(NetworkManager net, SPacketUpdateTileEntity pkt) {
-        this.readFromNBT(pkt.getNbtCompound());
-    }
-
-    @Override
-    public NBTTagCompound getUpdateTag() {
-        NBTTagCompound nbt = new NBTTagCompound();
-        this.writeToNBT(nbt);
-        return nbt;
-    }
-
-    @Override
-    public void handleUpdateTag(NBTTagCompound tag) {
-        this.readFromNBT(tag);
+        isCrafting = compound.getBoolean("isCrafting");
     }
 
     public ItemStackHandler getItemHandler() {
         return itemHandler;
-    }
-
-    @Override
-    public NBTTagCompound getTileData() {
-        NBTTagCompound nbt = new NBTTagCompound();
-        this.writeToNBT(nbt);
-        return nbt;
     }
 
     @Override
@@ -213,8 +201,8 @@ public class TileInfuser extends TileEntity implements ITickable, IFluidHandler,
         if (this.tankProperties == null)
         {
             this.tankProperties = new IFluidTankProperties[] {
-                 new FluidTankPropertiesWrapper(inputTank),
-                 new FluidTankPropertiesWrapper(outputTank)
+                    new FluidTankPropertiesWrapper(inputTank),
+                    new FluidTankPropertiesWrapper(outputTank)
             };
         }
         return this.tankProperties;
@@ -397,5 +385,32 @@ public class TileInfuser extends TileEntity implements ITickable, IFluidHandler,
 
     public void onContentsChanged() {
         markDirty();
+    }
+
+    private <P extends TileEntity & IAnimatable> PlayState predicate(AnimationEvent<P> event) {
+        AnimationController controller = event.getController();
+        controller.transitionLengthTicks = 200;
+        if (event.getAnimatable().getWorld().isRaining()) {
+            controller.setAnimation(new AnimationBuilder().addAnimation("infuser.craft", false));
+        }
+
+        return PlayState.CONTINUE;
+    }
+
+    private <ENTITY extends IAnimatable> void soundListener(SoundKeyframeEvent<ENTITY> event) {
+        EntityPlayerSP player = Minecraft.getMinecraft().player;
+        player.playSound(SoundProxy.INFUSER_MUSIC, 1, 1);
+    }
+
+    @Override
+    public void registerControllers(AnimationData data) {
+        AnimationController controller = new AnimationController(this, controllerName, 200, this::predicate);
+        controller.registerSoundListener(this::soundListener);
+        data.addAnimationController(controller);
+    }
+
+    @Override
+    public AnimationFactory getFactory() {
+        return this.factory;
     }
 }

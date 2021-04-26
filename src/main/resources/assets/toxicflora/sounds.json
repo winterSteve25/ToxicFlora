@@ -1,0 +1,11 @@
+{
+  "infuser_music": {
+    "category": "record",
+    "sounds": [
+      {
+        "name": "toxicflora:infuser_music",
+        "stream": true
+      }
+    ]
+  }
+}
