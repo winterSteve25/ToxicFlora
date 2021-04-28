@@ -71,12 +71,12 @@ public class ToxicFlora {
     public void preInit(FMLPreInitializationEvent event) {
         logger = event.getModLog();
         proxy.preInit(event);
+        GeckoLib.initialize();
     }
 
     @Mod.EventHandler
     public void init(FMLInitializationEvent e) {
         proxy.init(e);
-        GeckoLib.initialize();
     }
 
     @Mod.EventHandler

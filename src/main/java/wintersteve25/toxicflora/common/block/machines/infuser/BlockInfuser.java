@@ -1,16 +1,17 @@
 package wintersteve25.toxicflora.common.block.machines.infuser;
 
-import net.minecraft.block.BlockDirectional;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.state.BlockStateContainer;
+import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumBlockRenderType;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.fluids.FluidUtil;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 import wintersteve25.toxicflora.ToxicFlora;
@@ -26,14 +27,14 @@ import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import wintersteve25.toxicflora.client.model.renderers.RendererInfuser;
+import wintersteve25.toxicflora.client.model.renderers.GeoInfuserRenderer;
 import wintersteve25.toxicflora.common.handler.InventoryHandler;
 
 import javax.annotation.Nullable;
 import java.util.List;
 
 @SuppressWarnings("deprecation")
-public class BlockInfuser extends BlockDirectional implements ITileEntityProvider {
+public class BlockInfuser extends Block implements ITileEntityProvider {
 
     private static final AxisAlignedBB INFUSERHITBOX = new AxisAlignedBB(0, 0, 0, 1, 0.0625 * 13, 1);
 
@@ -48,8 +49,6 @@ public class BlockInfuser extends BlockDirectional implements ITileEntityProvide
         setResistance(6f);
         setSoundType(SoundType.METAL);
         setCreativeTab(ToxicFlora.toxicFloraMachines);
-
-        setDefaultState(getBlockState().getBaseState().withProperty(FACING, EnumFacing.NORTH));
     }
 
     @Override
@@ -89,21 +88,6 @@ public class BlockInfuser extends BlockDirectional implements ITileEntityProvide
     }
 
     @Override
-    protected BlockStateContainer createBlockState() {
-        return new BlockStateContainer(this, new IProperty[] {FACING});
-    }
-
-    @Override
-    public int getMetaFromState(IBlockState state) {
-        return state.getValue(FACING).getIndex();
-    }
-
-    @Override
-    public IBlockState getStateFromMeta(int meta) {
-        return this.getDefaultState().withProperty(FACING, EnumFacing.byIndex(meta & 7));
-    }
-
-    @Override
     public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
         if (!worldIn.isRemote) {
             ItemStack itemstack = playerIn.getHeldItem(hand);
@@ -125,7 +109,8 @@ public class BlockInfuser extends BlockDirectional implements ITileEntityProvide
 
     @SideOnly(Side.CLIENT)
     public void initModel() {
-        ClientRegistry.bindTileEntitySpecialRenderer(TileInfuser.class, new RendererInfuser());
+        ClientRegistry.bindTileEntitySpecialRenderer(TileInfuser.class, new GeoInfuserRenderer());
+        ModelLoader.setCustomModelResourceLocation(Item.getItemFromBlock(this), 0, new ModelResourceLocation(getRegistryName(), "inventory"));
     }
 
     @Override
@@ -153,8 +138,8 @@ public class BlockInfuser extends BlockDirectional implements ITileEntityProvide
             if(worldIn.isBlockPowered(pos)) {
                 TileEntity tile = worldIn.getTileEntity(pos);
                 if (tile instanceof TileInfuser) {
-                    TileInfuser tileInfuser = ((TileInfuser) tile);
-                    tileInfuser.tryStartCraft();
+                    TileInfuser TileInfuser = ((TileInfuser) tile);
+                    TileInfuser.tryStartCraft();
                 }
             }
         }

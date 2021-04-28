@@ -16,11 +16,11 @@ version = "1.0.17"
 group = "wintersteve25.toxicflora" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = "toxicflora"
 
-repositories.each {
-    if (it instanceof MavenArtifactRepository && it.url.toString() == "https://files.minecraftforge.net/maven") {
-        it.url = "https://maven.minecraftforge.net/"
-    }
-}
+// repositories.each {
+//     if (it instanceof MavenArtifactRepository && it.url.toString() == "https://files.minecraftforge.net/maven") {
+//         it.url = "https://maven.minecraftforge.net/"
+//     }
+// }
 
 
 sourceCompatibility = targetCompatibility = '1.8' // Need this here so eclipse task generates correctly.

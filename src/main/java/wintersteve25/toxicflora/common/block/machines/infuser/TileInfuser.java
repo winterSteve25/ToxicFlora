@@ -1,12 +1,7 @@
 package wintersteve25.toxicflora.common.block.machines.infuser;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.network.NetworkManager;
-import net.minecraft.network.play.server.SPacketUpdateTileEntity;
 import net.minecraft.util.EnumHand;
 import net.minecraftforge.fluids.*;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
@@ -20,30 +15,27 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.items.CapabilityItemHandler;
-import software.bernie.geckolib3.core.AnimationState;
 import software.bernie.geckolib3.core.IAnimatable;
 import software.bernie.geckolib3.core.PlayState;
 import software.bernie.geckolib3.core.builder.AnimationBuilder;
 import software.bernie.geckolib3.core.controller.AnimationController;
-import software.bernie.geckolib3.core.event.SoundKeyframeEvent;
 import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
 import software.bernie.geckolib3.core.manager.AnimationData;
 import software.bernie.geckolib3.core.manager.AnimationFactory;
-import software.bernie.geckolib3.util.GeckoLibUtil;
 import wintersteve25.toxicflora.ToxicFlora;
-import wintersteve25.toxicflora.client.proxy.SoundProxy;
+import wintersteve25.toxicflora.common.block.machines.BaseTileTF;
 import wintersteve25.toxicflora.common.crafting.RecipeInfuser;
 
 import javax.annotation.Nullable;
 
-public class TileInfuser extends TileEntity implements ITickable, IFluidHandler, IFluidTank, IAnimatable {
+public class TileInfuser extends BaseTileTF implements ITickable, IFluidHandler, IFluidTank, IAnimatable {
     private final ItemStackHandler itemHandler = new ItemStackHandler(1) {
         @Override
         protected void onContentsChanged(int slot) {
             TileInfuser.this.markDirty();
         }
     };
-    private static boolean isCrafting = false;
+    public static boolean isCrafting = false;
     public static int totalTicks = 0;
     private static int remainingTicks = 0;
     private static FluidStack inputFluidContent = null;
@@ -55,9 +47,7 @@ public class TileInfuser extends TileEntity implements ITickable, IFluidHandler,
     private static boolean canFill = true;
     private static boolean canDrain = true;
 
-    private BlockInfuser blockInfuser;
-    private final AnimationFactory factory = new AnimationFactory(this);
-    private String controllerName = "infuser_controller";
+    private final AnimationFactory manager = new AnimationFactory(this);
 
     @Override
     public void update() {
@@ -387,30 +377,26 @@ public class TileInfuser extends TileEntity implements ITickable, IFluidHandler,
         markDirty();
     }
 
-    private <P extends TileEntity & IAnimatable> PlayState predicate(AnimationEvent<P> event) {
+    private <E extends TileEntity & IAnimatable> PlayState predicate(AnimationEvent<E> event) {
         AnimationController controller = event.getController();
         controller.transitionLengthTicks = 200;
-        if (event.getAnimatable().getWorld().isRaining()) {
+
+        if (isCrafting) {
             controller.setAnimation(new AnimationBuilder().addAnimation("infuser.craft", false));
+        } else {
+            controller.setAnimation(new AnimationBuilder().addAnimation("infuser.idle", true));
         }
 
         return PlayState.CONTINUE;
     }
 
-    private <ENTITY extends IAnimatable> void soundListener(SoundKeyframeEvent<ENTITY> event) {
-        EntityPlayerSP player = Minecraft.getMinecraft().player;
-        player.playSound(SoundProxy.INFUSER_MUSIC, 1, 1);
-    }
-
     @Override
     public void registerControllers(AnimationData data) {
-        AnimationController controller = new AnimationController(this, controllerName, 200, this::predicate);
-        controller.registerSoundListener(this::soundListener);
-        data.addAnimationController(controller);
+        data.addAnimationController(new AnimationController(this, "controller", 200, this::predicate));
     }
 
     @Override
     public AnimationFactory getFactory() {
-        return this.factory;
+        return this.manager;
     }
 }
