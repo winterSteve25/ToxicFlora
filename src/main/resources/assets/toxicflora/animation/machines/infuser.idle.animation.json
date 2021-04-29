@@ -2,44 +2,41 @@
 	"format_version": "1.8.0",
 	"animations": {
 		"infuser.idle": {
-			"loop": true,
 			"animation_length": 4.5,
 			"bones": {
 				"spoon_thingy": {
 					"rotation": {
 						"0.0": {
-							"post": [0, 0, 0],
-							"lerp_mode": "catmullrom"
+							"vector": [0, 0, 0]
 						},
 						"1.5": {
-							"post": [0, -5, -2.5],
-							"lerp_mode": "catmullrom"
+							"vector": [0, -5, -2.5],
+							"easing": "easeInSine"
 						},
 						"3.0": {
-							"post": [0, 15, -15],
-							"lerp_mode": "catmullrom"
+							"vector": [0, 15, -15],
+							"easing": "easeInSine"
 						},
 						"4.5": {
-							"post": [0, 0, 0],
-							"lerp_mode": "catmullrom"
+							"vector": [0, 0, 0],
+							"easing": "easeInSine"
 						}
 					},
 					"position": {
 						"0.0": {
-							"post": [0, 0, 0],
-							"lerp_mode": "catmullrom"
+							"vector": [0, 0, 0]
 						},
 						"1.5": {
-							"post": [0, 1, 0],
-							"lerp_mode": "catmullrom"
+							"vector": [0, 1, 0],
+							"easing": "easeInSine"
 						},
 						"3.0": {
-							"post": [0, 0, 0],
-							"lerp_mode": "catmullrom"
+							"vector": [0, 0, 0],
+							"easing": "easeInSine"
 						},
 						"4.5": {
-							"post": [0, 0, 0],
-							"lerp_mode": "catmullrom"
+							"vector": [0, 0, 0],
+							"easing": "easeInSine"
 						}
 					}
 				}

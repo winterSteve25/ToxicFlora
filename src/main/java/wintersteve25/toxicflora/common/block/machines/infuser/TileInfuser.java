@@ -382,7 +382,12 @@ public class TileInfuser extends BaseTileTF implements ITickable, IFluidHandler,
         controller.transitionLengthTicks = 200;
 
         if (isCrafting) {
-            controller.setAnimation(new AnimationBuilder().addAnimation("infuser.craft", false));
+            controller.setAnimation(new AnimationBuilder().addAnimation("infuser.start_craft", false));
+            if (remainingTicks > 0) {
+                controller.setAnimation(new AnimationBuilder().addAnimation("infuser.crafting", true));
+            } else if (remainingTicks <= 0) {
+                controller.setAnimation(new AnimationBuilder().addAnimation("infuser.stop_craft", false));
+            }
         } else {
             controller.setAnimation(new AnimationBuilder().addAnimation("infuser.idle", true));
         }
