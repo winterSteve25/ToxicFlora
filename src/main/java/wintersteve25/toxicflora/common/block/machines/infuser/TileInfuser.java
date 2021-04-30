@@ -119,6 +119,10 @@ public class TileInfuser extends BaseItemInventoryTileTF implements ITickable, I
         isCrafting = compound.getBoolean("isCrafting");
     }
 
+    public FluidTank getInputTank() {
+        return inputTank;
+    }
+
     @Override
     public boolean hasCapability(Capability<?> capability, @Nullable EnumFacing facing) {
         if (capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY || capability == CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY) {
