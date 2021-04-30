@@ -1,7 +1,5 @@
 package wintersteve25.toxicflora.common.block.machines.infuser;
 
-import net.minecraft.block.properties.IProperty;
-import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
@@ -18,7 +16,6 @@ import wintersteve25.toxicflora.ToxicFlora;
 import net.minecraft.block.Block;
 import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.SoundType;
-import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ResourceLocation;
@@ -28,20 +25,20 @@ import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import wintersteve25.toxicflora.client.model.renderers.GeoInfuserRenderer;
+import wintersteve25.toxicflora.common.block.machines.BaseDirectionalBlockTF;
 import wintersteve25.toxicflora.common.handler.InventoryHandler;
 
 import javax.annotation.Nullable;
 import java.util.List;
 
 @SuppressWarnings("deprecation")
-public class BlockInfuser extends Block implements ITileEntityProvider {
+public class BlockInfuser extends BaseDirectionalBlockTF implements ITileEntityProvider {
 
     private static final AxisAlignedBB INFUSERHITBOX = new AxisAlignedBB(0, 0, 0, 1, 0.0625 * 13, 1);
 
     public static final ResourceLocation INFUSER = new ResourceLocation(ToxicFlora.MODID, "infuser");
 
     public BlockInfuser() {
-        super(Material.ROCK);
         setRegistryName(INFUSER);
         setTranslationKey(ToxicFlora.MODID + ".infuser");
         setHarvestLevel("pickaxe", 2);
@@ -51,18 +48,6 @@ public class BlockInfuser extends Block implements ITileEntityProvider {
         setCreativeTab(ToxicFlora.toxicFloraMachines);
     }
 
-    @Override
-    public boolean hasCustomBreakingProgress(IBlockState state) {
-        return true;
-    }
-    @Override
-    public boolean isOpaqueCube(IBlockState state) {
-        return false;
-    }
-    @Override
-    public boolean isFullBlock(IBlockState state) {
-        return false;
-    }
     @Override
     public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess source, BlockPos pos) {
         return INFUSERHITBOX;
@@ -96,7 +81,7 @@ public class BlockInfuser extends Block implements ITileEntityProvider {
             if (te instanceof TileInfuser) {
                 TileInfuser teinfuser = (TileInfuser) te;
                 if (!itemstack.isEmpty() && !FluidUtil.interactWithFluidHandler(playerIn, hand, worldIn, pos, facing)) {
-                    boolean result = teinfuser.addItem(playerIn, itemstack, hand);
+                    boolean result = teinfuser.addItem(playerIn, itemstack, hand, teinfuser.isCrafting);
                     return result;
                 } else if (itemstack.isEmpty() && teinfuser.hasItem() && playerIn.isSneaking()) {
                     InventoryHandler.withdrawFromInventory(teinfuser, playerIn);
@@ -111,11 +96,6 @@ public class BlockInfuser extends Block implements ITileEntityProvider {
     public void initModel() {
         ClientRegistry.bindTileEntitySpecialRenderer(TileInfuser.class, new GeoInfuserRenderer());
         ModelLoader.setCustomModelResourceLocation(Item.getItemFromBlock(this), 0, new ModelResourceLocation(getRegistryName(), "inventory"));
-    }
-
-    @Override
-    public EnumBlockRenderType getRenderType(IBlockState state) {
-        return EnumBlockRenderType.ENTITYBLOCK_ANIMATED;
     }
 
     @Override

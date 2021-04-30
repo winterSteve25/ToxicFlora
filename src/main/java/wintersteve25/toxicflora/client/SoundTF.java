@@ -15,5 +15,4 @@ public class SoundTF {
         INFUSER_MUSIC = new SoundEvent(location).setRegistryName(location);
         event.getRegistry().register(INFUSER_MUSIC);
     }
-
 }

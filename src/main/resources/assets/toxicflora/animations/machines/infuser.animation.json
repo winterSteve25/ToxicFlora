@@ -55,7 +55,7 @@
 			}
 		},
 		"infuser.crafting": {
-			"animation_length": 3.54167,
+			"animation_length": 5.5,
 			"bones": {
 				"spoon_thingy": {
 					"rotation": {
@@ -90,6 +90,22 @@
 						"3.5": {
 							"vector": [20, 82.5, -17.5],
 							"easing": "linear"
+						},
+						"4.0": {
+							"vector": [52.5, -15, 20],
+							"easing": "linear"
+						},
+						"4.5": {
+							"vector": [52.5, 12.5, -17.5],
+							"easing": "linear"
+						},
+						"5.0": {
+							"vector": [52.5, 77.5, -17.5],
+							"easing": "linear"
+						},
+						"5.5": {
+							"vector": [20, 82.5, -17.5],
+							"easing": "linear"
 						}
 					},
 					"position": {
@@ -122,6 +138,22 @@
 							"easing": "linear"
 						},
 						"3.5": {
+							"vector": [-4, 2, -1],
+							"easing": "linear"
+						},
+						"4.0": {
+							"vector": [1, 2, 1],
+							"easing": "linear"
+						},
+						"4.5": {
+							"vector": [2, 2, 1],
+							"easing": "linear"
+						},
+						"5.0": {
+							"vector": [1, 2, -4],
+							"easing": "linear"
+						},
+						"5.5": {
 							"vector": [-4, 2, -1],
 							"easing": "linear"
 						}
@@ -135,25 +167,33 @@
 			}
 		},
 		"infuser.stop_craft": {
-			"animation_length": 1.25,
+			"animation_length": 2.2,
 			"bones": {
 				"spoon_thingy": {
 					"rotation": {
 						"0.0": {
-							"vector": [20, 82.5, -17.5],
+							"vector": [52.5, 12.5, -17.5],
 							"easing": "linear"
 						},
 						"1.0": {
+							"vector": [20, 82.5, -17.5],
+							"easing": "linear"
+						},
+						"2.0": {
 							"vector": [20, 35, -17.5],
 							"easing": "easeInQuad"
 						}
 					},
 					"position": {
 						"0.0": {
-							"vector": [-4, 2, -1],
+							"vector": [2, 2, 1],
 							"easing": "linear"
 						},
 						"1.0": {
+							"vector": [-4, 2, -1],
+							"easing": "linear"
+						},
+						"2.0": {
 							"vector": [-4, 2, 3],
 							"easing": "easeInQuad"
 						}

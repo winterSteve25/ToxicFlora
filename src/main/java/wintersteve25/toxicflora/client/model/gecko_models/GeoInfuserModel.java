@@ -9,7 +9,7 @@ public class GeoInfuserModel extends AnimatedGeoModel<TileInfuser> {
     @Override
     public ResourceLocation getAnimationFileLocation(TileInfuser animatable)
     {
-        return new ResourceLocation(ToxicFlora.MODID, "animation/machines/infuser.animation.json");
+        return new ResourceLocation(ToxicFlora.MODID, "animations/machines/infuser.animation.json");
     }
 
     @Override
