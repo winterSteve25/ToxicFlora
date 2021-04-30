@@ -11,7 +11,6 @@ import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import wintersteve25.toxicflora.ToxicFlora;
-import wintersteve25.toxicflora.common.handler.ICustomModelHandler;
 import wintersteve25.toxicflora.common.item.ingredients.BaseToxicItems;
 import wintersteve25.toxicflora.common.item.tools.BaseToxicTools;
 import wintersteve25.toxicflora.common.item.tools.ItemFluidJar;

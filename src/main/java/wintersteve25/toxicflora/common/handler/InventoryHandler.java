@@ -10,12 +10,13 @@ import net.minecraft.world.World;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemHandlerHelper;
-import wintersteve25.toxicflora.common.block.machines.infuser.TileInfuser;
+import wintersteve25.toxicflora.common.block.machines.BaseItemInventoryTileTF;
 
-/**********
+/**
  * The codes in this class is basically from Botania 1.12.2 (InventoryHelper.java) by Vazkii
  * Full credits to him (awesome guy)
  * However it is slightly modified
+ *
  * Download his mod Botania here: https://www.curseforge.com/minecraft/mc-mods/botania
  */
 public class InventoryHandler {
@@ -34,7 +35,7 @@ public class InventoryHandler {
         return ret;
     }
 
-    public static void dropInventory(TileInfuser inv, World world, IBlockState state, BlockPos pos) {
+    public static void dropInventory(BaseItemInventoryTileTF inv, World world, IBlockState state, BlockPos pos) {
         if(inv != null) {
             for(int j1 = 0; j1 < 1; ++j1) {
                 ItemStack itemstack = inv.getItemHandler().getStackInSlot(j1);
@@ -48,7 +49,7 @@ public class InventoryHandler {
         }
     }
 
-    public static void withdrawFromInventory(TileInfuser inv, EntityPlayer player) {
+    public static void withdrawFromInventory(BaseItemInventoryTileTF inv, EntityPlayer player) {
         for(int i = 1 - 1; i >= 0; i--) {
             ItemStack stackAt = inv.getItemHandler().getStackInSlot(i);
             if(!stackAt.isEmpty()) {

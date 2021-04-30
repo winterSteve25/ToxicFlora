@@ -5,9 +5,6 @@ import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.fluids.*;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
-import net.minecraftforge.fluids.capability.FluidTankPropertiesWrapper;
-import net.minecraftforge.fluids.capability.IFluidHandler;
-import net.minecraftforge.fluids.capability.IFluidTankProperties;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
@@ -29,7 +26,7 @@ import wintersteve25.toxicflora.common.crafting.RecipeInfuser;
 
 import javax.annotation.Nullable;
 
-public class TileInfuser extends BaseItemInventoryTileTF implements ITickable, IFluidHandler, IFluidTank, IAnimatable {
+public class TileInfuser extends BaseItemInventoryTileTF implements ITickable, IAnimatable {
 
     public static boolean isCrafting = false;
     public static int totalTicks = 0;
@@ -39,9 +36,6 @@ public class TileInfuser extends BaseItemInventoryTileTF implements ITickable, I
     private static final int capacity = Fluid.BUCKET_VOLUME*4;
     public static final FluidTank inputTank = new FluidTank(capacity);
     public static final FluidTank outputTank = new FluidTank(capacity);
-    private static IFluidTankProperties[] tankProperties;
-    private static boolean canFill = true;
-    private static boolean canDrain = true;
 
     private final AnimationFactory manager = new AnimationFactory(this);
 
@@ -156,197 +150,6 @@ public class TileInfuser extends BaseItemInventoryTileTF implements ITickable, I
     public boolean hasItem() {
         ItemStack itemStack = new ItemStack(itemHandler.serializeNBT());
         if (itemStack == null) { return false; } else { return true; }
-    }
-
-    @Override
-    public IFluidTankProperties[] getTankProperties() {
-        if (this.tankProperties == null)
-        {
-            this.tankProperties = new IFluidTankProperties[] {
-                    new FluidTankPropertiesWrapper(inputTank),
-                    new FluidTankPropertiesWrapper(outputTank)
-            };
-        }
-        return this.tankProperties;
-    }
-
-    @Nullable
-    @Override
-    public FluidStack getFluid() {
-        return inputFluidContent;
-    }
-
-    public FluidStack getOutputFluid() {
-        return outputFluidContent;
-    }
-
-    @Override
-    public int getFluidAmount() {
-        if (inputFluidContent == null)
-        {
-            return 0;
-        }
-        return inputFluidContent.amount;
-    }
-
-    @Override
-    public int getCapacity() {
-        return capacity;
-    }
-
-    @Override
-    public FluidTankInfo getInfo() {
-        return new FluidTankInfo(this);
-    }
-
-    @Override
-    public int fill(FluidStack resource, boolean doFill) {
-        if (!canFillFluidType(resource))
-        {
-            return 0;
-        }
-
-        return fillInternal(resource, doFill);
-    }
-
-    @Nullable
-    @Override
-    public FluidStack drain(FluidStack resource, boolean doDrain) {
-        if (!canDrainFluidType(getFluid())) {
-            return null;
-        }
-        return drainInternal(resource, doDrain);
-    }
-
-    @Nullable
-    public FluidStack drainInternal(FluidStack resource, boolean doDrain)
-    {
-        if (resource == null || !resource.isFluidEqual(getFluid())) {
-            return null;
-        }
-        return drainInternal(resource.amount, doDrain);
-    }
-
-    @Nullable
-    @Override
-    public FluidStack drain(int maxDrain, boolean doDrain) {
-        if (!canDrainFluidType(inputFluidContent)) {
-            return null;
-        }
-        return drainInternal(maxDrain, doDrain);
-    }
-
-    @Nullable
-    public FluidStack drainInternal(int maxDrain, boolean doDrain)
-    {
-        TileInfuser tile = new TileInfuser();
-        if (inputFluidContent == null || maxDrain <= 0) {
-            return null;
-        }
-        int drained = maxDrain;
-        if (inputFluidContent.amount < drained)
-        {
-            drained = inputFluidContent.amount;
-        }
-
-        FluidStack stack = new FluidStack(inputFluidContent, drained);
-        if (doDrain)
-        {
-            inputFluidContent.amount -= drained;
-            if (inputFluidContent.amount <= 0)
-            {
-                inputFluidContent = null;
-            }
-
-            onContentsChanged();
-
-            if (tile != null)
-            {
-                FluidEvent.fireEvent(new FluidEvent.FluidDrainingEvent(inputFluidContent, tile.getWorld(), tile.getPos(), this, drained));
-            }
-        }
-        return stack;
-    }
-
-    public boolean canDrainFluidType(@Nullable FluidStack fluid)
-    {
-        return fluid != null && canDrain();
-    }
-
-    public boolean canDrain() {
-        return canDrain;
-    }
-
-    public boolean canFillFluidType(FluidStack inputFluidContent) {
-        return canFill();
-    }
-
-    public boolean canFill() {
-        return canFill;
-    }
-
-    public int fillInternal(FluidStack resource, boolean doFill) {
-        TileInfuser tile = new TileInfuser();
-        if (resource == null || resource.amount <= 0)
-        {
-            return 0;
-        }
-
-        if (!doFill)
-        {
-            if (inputFluidContent == null)
-            {
-                return Math.min(capacity, resource.amount);
-            }
-
-            if (!inputFluidContent.isFluidEqual(resource))
-            {
-                return 0;
-            }
-
-            return Math.min(capacity - inputFluidContent.amount, resource.amount);
-        }
-
-        if (inputFluidContent == null)
-        {
-            inputFluidContent = new FluidStack(resource, Math.min(capacity, resource.amount));
-
-            onContentsChanged();
-
-            if (tile != null)
-            {
-                FluidEvent.fireEvent(new FluidEvent.FluidFillingEvent(inputFluidContent, tile.getWorld(), tile.getPos(), this, inputFluidContent.amount));
-            }
-            return inputFluidContent.amount;
-        }
-
-        if (!inputFluidContent.isFluidEqual(resource))
-        {
-            return 0;
-        }
-        int filled = capacity - inputFluidContent.amount;
-
-        if (resource.amount < filled)
-        {
-            inputFluidContent.amount += resource.amount;
-            filled = resource.amount;
-        }
-        else
-        {
-            inputFluidContent.amount = capacity;
-        }
-
-        onContentsChanged();
-
-        if (tile != null)
-        {
-            FluidEvent.fireEvent(new FluidEvent.FluidFillingEvent(inputFluidContent, tile.getWorld(), tile.getPos(), this, filled));
-        }
-        return filled;
-    }
-
-    public void onContentsChanged() {
-        markDirty();
     }
 
     private <E extends TileEntity & IAnimatable> PlayState predicate(AnimationEvent<E> event) {

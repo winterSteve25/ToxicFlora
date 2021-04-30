@@ -10,9 +10,8 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.World;
 import wintersteve25.toxicflora.ToxicFlora;
-import wintersteve25.toxicflora.common.block.flowers.BaseToxicFlora;
 
-public class BlockShadeShroom extends BaseToxicFlora {
+public class BlockShadeShroom extends BaseFloraTF {
 
     public static final ResourceLocation SHADESHROOM = new ResourceLocation(ToxicFlora.MODID, "shadeshroom");
 

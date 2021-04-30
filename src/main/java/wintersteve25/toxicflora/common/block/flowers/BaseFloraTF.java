@@ -17,8 +17,8 @@ import wintersteve25.toxicflora.client.particles.purple.PurpleFloraParticle;
 
 import java.util.Random;
 
-public class BaseToxicFlora extends BlockBush {
-    public BaseToxicFlora() {
+public class BaseFloraTF extends BlockBush {
+    public BaseFloraTF() {
         super(Material.PLANTS);
         setCreativeTab(ToxicFlora.toxicFloraPlants);
         setLightLevel(1.8F);
