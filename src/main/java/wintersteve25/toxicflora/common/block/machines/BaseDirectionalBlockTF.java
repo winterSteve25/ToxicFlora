@@ -40,11 +40,6 @@ public class BaseDirectionalBlockTF extends BlockDirectional {
     }
 
     @Override
-    public EnumBlockRenderType getRenderType(IBlockState state) {
-        return EnumBlockRenderType.ENTITYBLOCK_ANIMATED;
-    }
-
-    @Override
     public boolean hasCustomBreakingProgress(IBlockState state) {
         return true;
     }

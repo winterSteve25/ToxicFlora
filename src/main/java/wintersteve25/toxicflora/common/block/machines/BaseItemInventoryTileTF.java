@@ -19,35 +19,9 @@ import javax.annotation.Nullable;
 
 public abstract class BaseItemInventoryTileTF extends TileEntity{
 
-    protected final ItemStackHandler itemHandler = new ItemStackHandler(1) {
-        @Override
-        protected void onContentsChanged(int slot) {
-            BaseItemInventoryTileTF.this.markDirty();
-        }
-    };
+    protected ItemStackHandler itemHandler = createHandler();
 
-    public boolean addItem(@Nullable EntityPlayer player, ItemStack heldItem, @Nullable EnumHand hand, boolean isCrafting) {
-        if (!itemHandler.getStackInSlot(0).isEmpty()) {
-            return false;
-        }
-        if (isCrafting == true) {
-            return false;
-        }
-        if (itemHandler.getStackInSlot(0).isEmpty()) {
-            ItemStack itemAdd = heldItem.copy();
-            itemHandler.insertItem(0, itemAdd, false);
-            if(player == null || !player.capabilities.isCreativeMode) {
-                heldItem.shrink(heldItem.getCount());
-
-            }
-            markDirty();
-        }
-        return true;
-    }
-
-    public ItemStackHandler getItemHandler() {
-        return itemHandler;
-    }
+    public abstract boolean addItem(@Nullable EntityPlayer player, ItemStack heldItem, @Nullable EnumHand hand, boolean isCrafting);
 
     @Override
     public boolean hasCapability(Capability<?> capability, @Nullable EnumFacing facing) {
@@ -80,6 +54,16 @@ public abstract class BaseItemInventoryTileTF extends TileEntity{
         }
     }
 
+    public ItemStackHandler getItemHandler() {
+        return itemHandler;
+    }
+
+    public abstract int getInvSize();
+
+    protected ItemStackHandler createHandler() {
+        return new ItemStackHandlerTF(this);
+    }
+
     @Override
     public SPacketUpdateTileEntity getUpdatePacket() {
         NBTTagCompound nbt = new NBTTagCompound();
@@ -110,5 +94,19 @@ public abstract class BaseItemInventoryTileTF extends TileEntity{
         NBTTagCompound nbt = new NBTTagCompound();
         this.writeToNBT(nbt);
         return nbt;
+    }
+
+    protected static class ItemStackHandlerTF extends ItemStackHandler {
+        private final BaseItemInventoryTileTF tile;
+
+        public ItemStackHandlerTF(BaseItemInventoryTileTF inv) {
+            super(inv.getInvSize());
+            tile = inv;
+        }
+
+        @Override
+        public void onContentsChanged(int slot) {
+            tile.markDirty();
+        }
     }
 }

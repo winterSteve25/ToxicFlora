@@ -6,21 +6,19 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureMap;
+import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import org.lwjgl.opengl.GL11;
-import software.bernie.geckolib3.renderers.geo.GeoBlockRenderer;
-import wintersteve25.toxicflora.client.model.gecko_models.GeoInfuserModel;
 import wintersteve25.toxicflora.common.block.machines.infuser.TileInfuser;
 
-public class GeoInfuserRenderer extends GeoBlockRenderer<TileInfuser> {
+@SideOnly(Side.CLIENT)
+public class InfuserTESR extends TileEntitySpecialRenderer<TileInfuser> {
     public static final float TANK_THICKNESS = 0.05f;
-
-    public GeoInfuserRenderer() {
-        super(new GeoInfuserModel());
-    }
 
     @Override
     public void render(TileInfuser tileEntity, double x, double y, double z, float partialTicks, int destroyStage, float alpha) {
@@ -51,7 +49,7 @@ public class GeoInfuserRenderer extends GeoBlockRenderer<TileInfuser> {
             return;
         }
 
-        float scale = (1.0f - TANK_THICKNESS/2 - TANK_THICKNESS) * fluid.amount / (tank.getInputTank().getCapacity());
+        float scale = (0.0625f * 8 - 1.0f - TANK_THICKNESS/2 - TANK_THICKNESS) * fluid.amount / (tank.getInputTank().getCapacity());
 
         if (scale > 0.0f) {
             Tessellator tessellator = Tessellator.getInstance();
@@ -76,6 +74,7 @@ public class GeoInfuserRenderer extends GeoBlockRenderer<TileInfuser> {
             renderer.pos(1-TANK_THICKNESS, scale + TANK_THICKNESS, TANK_THICKNESS).tex(u2, v1).color(255, 255, 255, 128).endVertex();
 
             tessellator.draw();
+
             net.minecraft.client.renderer.RenderHelper.enableStandardItemLighting();
         }
     }

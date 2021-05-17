@@ -2,6 +2,7 @@ package wintersteve25.toxicflora.common.compat.crafttweaker;
 
 import com.blamejared.mtlib.helpers.InputHelper;
 import crafttweaker.annotations.ZenRegister;
+import crafttweaker.api.item.IIngredient;
 import crafttweaker.api.item.IItemStack;
 import crafttweaker.api.liquid.ILiquidStack;
 import stanhebben.zenscript.annotations.ZenClass;
@@ -12,18 +13,18 @@ import wintersteve25.toxicflora.common.crafting.RecipeInfuser;
 @ZenClass("mods.toxicflora.HerbInfuser")
 public class CompatInfuserCT {
     @ZenMethod
-    public static void addRecipe(IItemStack itemInput, ILiquidStack fluidInput, ILiquidStack fluidOutput) {
-        RecipeInfuser.addRecipe(InputHelper.toStack(itemInput), InputHelper.toFluid(fluidInput), InputHelper.toFluid(fluidOutput));
+    public static void addRecipe(IIngredient itemInput, ILiquidStack fluidInput, ILiquidStack fluidOutput) {
+        RecipeInfuser.addRecipe(InputHelper.toObject(itemInput), InputHelper.toFluid(fluidInput), InputHelper.toFluid(fluidOutput));
     }
 
     @ZenMethod
-    public static void addRecipe(IItemStack itemInput, ILiquidStack fluidInput, ILiquidStack fluidOutput, int processTime) {
-        RecipeInfuser.addRecipe(InputHelper.toStack(itemInput), InputHelper.toFluid(fluidInput), InputHelper.toFluid(fluidOutput), processTime);
+    public static void addRecipe(IIngredient itemInput, ILiquidStack fluidInput, ILiquidStack fluidOutput, int processTime) {
+        RecipeInfuser.addRecipe(InputHelper.toObject(itemInput), InputHelper.toFluid(fluidInput), InputHelper.toFluid(fluidOutput), processTime);
     }
 
     @ZenMethod
-    public static void addRecipe(IItemStack itemInput, ILiquidStack fluidInput, ILiquidStack fluidOutput, int processTime, int minVitality) {
-        RecipeInfuser.addRecipe(InputHelper.toStack(itemInput), InputHelper.toFluid(fluidInput), InputHelper.toFluid(fluidOutput), processTime, minVitality);
+    public static void addRecipe(IIngredient itemInput, ILiquidStack fluidInput, ILiquidStack fluidOutput, int processTime, int minVitality) {
+        RecipeInfuser.addRecipe(InputHelper.toObject(itemInput), InputHelper.toFluid(fluidInput), InputHelper.toFluid(fluidOutput), processTime, minVitality);
     }
 
     @ZenMethod

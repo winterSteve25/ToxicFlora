@@ -1,43 +1,39 @@
 package wintersteve25.toxicflora.common.block.machines.infuser;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.EntityPlayerSP;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.EnumHand;
 import net.minecraftforge.fluids.*;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.items.CapabilityItemHandler;
-import software.bernie.geckolib3.core.IAnimatable;
-import software.bernie.geckolib3.core.PlayState;
-import software.bernie.geckolib3.core.builder.AnimationBuilder;
-import software.bernie.geckolib3.core.controller.AnimationController;
-import software.bernie.geckolib3.core.event.SoundKeyframeEvent;
-import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
-import software.bernie.geckolib3.core.manager.AnimationData;
-import software.bernie.geckolib3.core.manager.AnimationFactory;
 import wintersteve25.toxicflora.ToxicFlora;
-import wintersteve25.toxicflora.client.SoundTF;
 import wintersteve25.toxicflora.common.block.machines.BaseItemInventoryTileTF;
 import wintersteve25.toxicflora.common.crafting.RecipeInfuser;
 
 import javax.annotation.Nullable;
 
-public class TileInfuser extends BaseItemInventoryTileTF implements ITickable, IAnimatable {
+public class TileInfuser extends BaseItemInventoryTileTF implements ITickable {
 
     public static boolean isCrafting = false;
     public static int totalTicks = 0;
     public static int remainingTicks = 0;
-    private static FluidStack inputFluidContent = null;
-    private static FluidStack outputFluidContent = null;
-    private static final int capacity = Fluid.BUCKET_VOLUME*4;
-    public static final FluidTank inputTank = new FluidTank(capacity);
-    public static final FluidTank outputTank = new FluidTank(capacity);
-
-    private final AnimationFactory manager = new AnimationFactory(this);
+    public static final int capacity = Fluid.BUCKET_VOLUME*4;
+    public FluidTank inputTank = new FluidTank(capacity) {
+        @Override
+        protected void onContentsChanged() {
+            markDirty();
+        }
+    };
+    public FluidTank outputTank = new FluidTank(capacity){
+        @Override
+        protected void onContentsChanged() {
+            markDirty();
+        }
+    };
 
     @Override
     public void update() {
@@ -56,9 +52,8 @@ public class TileInfuser extends BaseItemInventoryTileTF implements ITickable, I
                         }
                         if (remainingTicks <= 0) {
                             ToxicFlora.getLogger().info("Infuser Craft completed");
-                            outputFluidContent = RecipeInfuser.getFluidOutput(inputTank, itemStack).copy();
+                            FluidStack outputFluidContent = RecipeInfuser.getFluidOutput(inputTank, itemStack).copy();
                             outputTank.fill(outputFluidContent, true);
-                            inputFluidContent = null;
                             inputTank.drain(recipe.getFluidInput(), true);
                             itemHandler.extractItem(0, 1, false);
                             isCrafting = false;
@@ -85,6 +80,9 @@ public class TileInfuser extends BaseItemInventoryTileTF implements ITickable, I
     }
 
     public void tryStartCraft() {
+        if (isCrafting) {
+            return;
+        }
         if (!world.isRemote) {
             this.isCrafting = true;
             markDirty();
@@ -95,6 +93,15 @@ public class TileInfuser extends BaseItemInventoryTileTF implements ITickable, I
     public NBTTagCompound writeToNBT(NBTTagCompound compound) {
         super.writeToNBT(compound);
         compound.setTag("items", itemHandler.serializeNBT());
+
+        NBTTagCompound inTankNBT = new NBTTagCompound();
+        NBTTagCompound outTankNBT = new NBTTagCompound();
+
+        inputTank.writeToNBT(inTankNBT);
+        outputTank.writeToNBT(outTankNBT);
+        compound.setTag("inTank", inTankNBT);
+        compound.setTag("outTank", outTankNBT);
+
         inputTank.writeToNBT(compound);
         outputTank.writeToNBT(compound);
 
@@ -109,11 +116,12 @@ public class TileInfuser extends BaseItemInventoryTileTF implements ITickable, I
         if(compound.hasKey("items")) {
             itemHandler.deserializeNBT(compound.getCompoundTag("items"));
         }
-        inputTank.readFromNBT(compound);
-        inputFluidContent = FluidStack.loadFluidStackFromNBT(compound);
 
+        inputTank.readFromNBT(compound.getCompoundTag("inTank"));
+        outputTank.readFromNBT(compound.getCompoundTag("outTank"));
+
+        inputTank.readFromNBT(compound);
         outputTank.readFromNBT(compound);
-        outputFluidContent = FluidStack.loadFluidStackFromNBT(compound);
 
         remainingTicks = compound.getInteger("progress");
         isCrafting = compound.getBoolean("isCrafting");
@@ -121,6 +129,35 @@ public class TileInfuser extends BaseItemInventoryTileTF implements ITickable, I
 
     public FluidTank getInputTank() {
         return inputTank;
+    }
+
+    @Override
+    public int getInvSize() {
+        return 1;
+    }
+
+    public boolean hasItem() {
+        ItemStack itemStack = new ItemStack(itemHandler.serializeNBT());
+        if (itemStack == null) { return false; } else { return true; }
+    }
+
+    @Override
+    public boolean addItem(@Nullable EntityPlayer player, ItemStack heldItem, @Nullable EnumHand hand, boolean isCrafting) {
+        if (!itemHandler.getStackInSlot(0).isEmpty()) {
+            return false;
+        }
+        if (isCrafting) {
+            return false;
+        }
+        if (itemHandler.getStackInSlot(0).isEmpty()) {
+            ItemStack itemAdd = heldItem.copy();
+            itemHandler.insertItem(0, itemAdd, false);
+            if(player == null || !player.capabilities.isCreativeMode) {
+                heldItem.shrink(heldItem.getCount());
+            }
+            markDirty();
+        }
+        return true;
     }
 
     @Override
@@ -149,41 +186,5 @@ public class TileInfuser extends BaseItemInventoryTileTF implements ITickable, I
             }
         }
         return super.getCapability(capability, facing);
-    }
-
-    public boolean hasItem() {
-        ItemStack itemStack = new ItemStack(itemHandler.serializeNBT());
-        if (itemStack == null) { return false; } else { return true; }
-    }
-
-    private <E extends TileEntity & IAnimatable> PlayState predicate(AnimationEvent<E> event) {
-        AnimationController controller = event.getController();
-        controller.transitionLengthTicks = 0;
-
-        if (isCrafting) {
-            controller.setAnimation(new AnimationBuilder().addAnimation("infuser.start_craft", false).addAnimation("infuser.crafting", false).addAnimation("infuser.stop_craft", false));
-        } else {
-            controller.setAnimation(new AnimationBuilder().addAnimation("infuser.idle", true));
-        }
-
-        return PlayState.CONTINUE;
-    }
-
-    @Override
-    public void registerControllers(AnimationData data) {
-        AnimationController controller = new AnimationController(this, "controller", 0, this::predicate);
-
-        controller.registerSoundListener(this::soundListener);
-        data.addAnimationController(controller);
-    }
-
-    private <ENTITY extends IAnimatable> void soundListener(SoundKeyframeEvent<ENTITY> event) {
-        EntityPlayerSP player = Minecraft.getMinecraft().player;
-        player.playSound(SoundTF.INFUSER_MUSIC, 1, 1);
-    }
-
-    @Override
-    public AnimationFactory getFactory() {
-        return this.manager;
     }
 }

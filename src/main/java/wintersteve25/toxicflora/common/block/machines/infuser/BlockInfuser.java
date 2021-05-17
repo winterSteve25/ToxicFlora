@@ -5,6 +5,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.EnumBlockRenderType;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -23,7 +24,7 @@ import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import wintersteve25.toxicflora.client.model.renderers.GeoInfuserRenderer;
+import wintersteve25.toxicflora.client.model.renderers.InfuserTESR;
 import wintersteve25.toxicflora.common.block.machines.BaseDirectionalBlockTF;
 import wintersteve25.toxicflora.common.handler.InventoryHandler;
 
@@ -59,13 +60,15 @@ public class BlockInfuser extends BaseDirectionalBlockTF implements ITileEntityP
     public boolean canConnectRedstone(IBlockState state, IBlockAccess world, BlockPos pos, @Nullable EnumFacing side) {
         return true;
     }
-
+    @Override
+    public boolean isBlockNormalCube(IBlockState state) {
+        return false;
+    }
     @Nullable
     @Override
     public TileEntity createNewTileEntity(World worldIn, int meta) {
         return new TileInfuser();
     }
-
     @Override
     public boolean hasTileEntity() {
         return true;
@@ -80,8 +83,7 @@ public class BlockInfuser extends BaseDirectionalBlockTF implements ITileEntityP
             if (te instanceof TileInfuser) {
                 TileInfuser teinfuser = (TileInfuser) te;
                 if (!itemstack.isEmpty() && !FluidUtil.interactWithFluidHandler(playerIn, hand, worldIn, pos, facing)) {
-                    boolean result = teinfuser.addItem(playerIn, itemstack, hand, teinfuser.isCrafting);
-                    return result;
+                    return teinfuser.addItem(playerIn, itemstack, hand, teinfuser.isCrafting);
                 } else if (itemstack.isEmpty() && teinfuser.hasItem() && playerIn.isSneaking()) {
                     InventoryHandler.withdrawFromInventory(teinfuser, playerIn);
                     return true;
@@ -93,7 +95,7 @@ public class BlockInfuser extends BaseDirectionalBlockTF implements ITileEntityP
 
     @SideOnly(Side.CLIENT)
     public void initModel() {
-        ClientRegistry.bindTileEntitySpecialRenderer(TileInfuser.class, new GeoInfuserRenderer());
+        ClientRegistry.bindTileEntitySpecialRenderer(TileInfuser.class, new InfuserTESR());
         ModelLoader.setCustomModelResourceLocation(Item.getItemFromBlock(this), 0, new ModelResourceLocation(getRegistryName(), "inventory"));
     }
 

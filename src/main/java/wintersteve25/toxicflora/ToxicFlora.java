@@ -1,7 +1,5 @@
 package wintersteve25.toxicflora;
 
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.logging.log4j.LogManager;
 import software.bernie.geckolib3.GeckoLib;
 import wintersteve25.toxicflora.common.block.BlocksTF;
