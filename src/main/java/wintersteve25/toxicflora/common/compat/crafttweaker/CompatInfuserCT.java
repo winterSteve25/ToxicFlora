@@ -5,6 +5,7 @@ import crafttweaker.annotations.ZenRegister;
 import crafttweaker.api.item.IIngredient;
 import crafttweaker.api.item.IItemStack;
 import crafttweaker.api.liquid.ILiquidStack;
+import stanhebben.zenscript.annotations.Optional;
 import stanhebben.zenscript.annotations.ZenClass;
 import stanhebben.zenscript.annotations.ZenMethod;
 import wintersteve25.toxicflora.common.crafting.RecipeInfuser;
@@ -18,12 +19,7 @@ public class CompatInfuserCT {
     }
 
     @ZenMethod
-    public static void addRecipe(IIngredient itemInput, ILiquidStack fluidInput, ILiquidStack fluidOutput, int processTime) {
-        RecipeInfuser.addRecipe(InputHelper.toObject(itemInput), InputHelper.toFluid(fluidInput), InputHelper.toFluid(fluidOutput), processTime);
-    }
-
-    @ZenMethod
-    public static void addRecipe(IIngredient itemInput, ILiquidStack fluidInput, ILiquidStack fluidOutput, int processTime, int minVitality) {
+    public static void addRecipe(IIngredient itemInput, ILiquidStack fluidInput, ILiquidStack fluidOutput, @Optional int processTime, @Optional int minVitality) {
         RecipeInfuser.addRecipe(InputHelper.toObject(itemInput), InputHelper.toFluid(fluidInput), InputHelper.toFluid(fluidOutput), processTime, minVitality);
     }
 

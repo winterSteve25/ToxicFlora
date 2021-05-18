@@ -5,7 +5,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.EnumBlockRenderType;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -26,7 +25,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import wintersteve25.toxicflora.client.model.renderers.InfuserTESR;
 import wintersteve25.toxicflora.common.block.machines.BaseDirectionalBlockTF;
-import wintersteve25.toxicflora.common.handler.InventoryHandler;
+import wintersteve25.toxicflora.common.helper.InvHelper;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -60,10 +59,6 @@ public class BlockInfuser extends BaseDirectionalBlockTF implements ITileEntityP
     public boolean canConnectRedstone(IBlockState state, IBlockAccess world, BlockPos pos, @Nullable EnumFacing side) {
         return true;
     }
-    @Override
-    public boolean isBlockNormalCube(IBlockState state) {
-        return false;
-    }
     @Nullable
     @Override
     public TileEntity createNewTileEntity(World worldIn, int meta) {
@@ -85,7 +80,7 @@ public class BlockInfuser extends BaseDirectionalBlockTF implements ITileEntityP
                 if (!itemstack.isEmpty() && !FluidUtil.interactWithFluidHandler(playerIn, hand, worldIn, pos, facing)) {
                     return teinfuser.addItem(playerIn, itemstack, hand, teinfuser.isCrafting);
                 } else if (itemstack.isEmpty() && teinfuser.hasItem() && playerIn.isSneaking()) {
-                    InventoryHandler.withdrawFromInventory(teinfuser, playerIn);
+                    InvHelper.withdrawFromInventory(teinfuser, playerIn);
                     return true;
                 }
             }
@@ -106,7 +101,7 @@ public class BlockInfuser extends BaseDirectionalBlockTF implements ITileEntityP
             TileInfuser teinfuser = (TileInfuser) te;
             for (int i = 0; i < 1; i++) {
                 if (teinfuser.getItemHandler().getStackInSlot(i).isEmpty() == false) {
-                    InventoryHandler.dropInventory(teinfuser, worldIn, state, pos);
+                    InvHelper.dropInventory(teinfuser, worldIn, state, pos);
                 }
             }
         }

@@ -1,5 +1,6 @@
 package wintersteve25.toxicflora.common.block.machines;
 
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -106,6 +107,8 @@ public abstract class BaseItemInventoryTileTF extends TileEntity{
 
         @Override
         public void onContentsChanged(int slot) {
+            IBlockState state = tile.world.getBlockState(tile.pos);
+            tile.world.notifyBlockUpdate(tile.pos, state, state, 3);
             tile.markDirty();
         }
     }

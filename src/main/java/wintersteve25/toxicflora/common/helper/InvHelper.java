@@ -1,4 +1,4 @@
-package wintersteve25.toxicflora.common.handler;
+package wintersteve25.toxicflora.common.helper;
 
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
@@ -19,7 +19,7 @@ import wintersteve25.toxicflora.common.block.machines.BaseItemInventoryTileTF;
  *
  * Download his mod Botania here: https://www.curseforge.com/minecraft/mc-mods/botania
  */
-public class InventoryHandler {
+public class InvHelper {
     public static IItemHandler getInventory(World world, BlockPos pos, EnumFacing side) {
         TileEntity te = world.getTileEntity(pos);
 

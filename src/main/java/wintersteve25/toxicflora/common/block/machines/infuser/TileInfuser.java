@@ -1,7 +1,10 @@
 package wintersteve25.toxicflora.common.block.machines.infuser;
 
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
+import net.minecraft.network.NetworkManager;
+import net.minecraft.network.play.server.SPacketUpdateTileEntity;
 import net.minecraft.util.EnumHand;
 import net.minecraftforge.fluids.*;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
@@ -22,15 +25,19 @@ public class TileInfuser extends BaseItemInventoryTileTF implements ITickable {
     public static int totalTicks = 0;
     public static int remainingTicks = 0;
     public static final int capacity = Fluid.BUCKET_VOLUME*4;
-    public FluidTank inputTank = new FluidTank(capacity) {
+    private FluidTank inputTank = new FluidTank(capacity) {
         @Override
         protected void onContentsChanged() {
+            IBlockState state = world.getBlockState(pos);
+            world.notifyBlockUpdate(pos, state, state, 3);
             markDirty();
         }
     };
-    public FluidTank outputTank = new FluidTank(capacity){
+    private FluidTank outputTank = new FluidTank(capacity){
         @Override
         protected void onContentsChanged() {
+            IBlockState state = world.getBlockState(pos);
+            world.notifyBlockUpdate(pos, state, state, 3);
             markDirty();
         }
     };
@@ -90,6 +97,35 @@ public class TileInfuser extends BaseItemInventoryTileTF implements ITickable {
     }
 
     @Override
+    public NBTTagCompound getUpdateTag() {
+        NBTTagCompound nbtTag = super.getUpdateTag();
+        NBTTagCompound inTankNBT = new NBTTagCompound();
+        NBTTagCompound outTankNBT = new NBTTagCompound();
+
+        nbtTag.setTag("itemsInSlot", itemHandler.serializeNBT());
+
+        inputTank.writeToNBT(inTankNBT);
+        outputTank.writeToNBT(outTankNBT);
+        nbtTag.setTag("inputTank", inTankNBT);
+        nbtTag.setTag("outputTank", outTankNBT);
+        return nbtTag;
+    }
+
+    @Nullable
+    @Override
+    public SPacketUpdateTileEntity getUpdatePacket() {
+        return new SPacketUpdateTileEntity(pos, 1, getUpdateTag());
+    }
+
+    @Override
+    public void onDataPacket(NetworkManager net, SPacketUpdateTileEntity packet) {
+        itemHandler.deserializeNBT(packet.getNbtCompound().getCompoundTag("itemsInSlot"));
+
+        inputTank.readFromNBT(packet.getNbtCompound().getCompoundTag("inputTank"));
+        outputTank.readFromNBT(packet.getNbtCompound().getCompoundTag("outputTank"));
+    }
+
+    @Override
     public NBTTagCompound writeToNBT(NBTTagCompound compound) {
         super.writeToNBT(compound);
         compound.setTag("items", itemHandler.serializeNBT());
@@ -101,9 +137,6 @@ public class TileInfuser extends BaseItemInventoryTileTF implements ITickable {
         outputTank.writeToNBT(outTankNBT);
         compound.setTag("inTank", inTankNBT);
         compound.setTag("outTank", outTankNBT);
-
-        inputTank.writeToNBT(compound);
-        outputTank.writeToNBT(compound);
 
         compound.setInteger("progress", remainingTicks);
         compound.setBoolean("isCrafting", isCrafting);
@@ -120,15 +153,8 @@ public class TileInfuser extends BaseItemInventoryTileTF implements ITickable {
         inputTank.readFromNBT(compound.getCompoundTag("inTank"));
         outputTank.readFromNBT(compound.getCompoundTag("outTank"));
 
-        inputTank.readFromNBT(compound);
-        outputTank.readFromNBT(compound);
-
         remainingTicks = compound.getInteger("progress");
         isCrafting = compound.getBoolean("isCrafting");
-    }
-
-    public FluidTank getInputTank() {
-        return inputTank;
     }
 
     @Override
@@ -186,5 +212,13 @@ public class TileInfuser extends BaseItemInventoryTileTF implements ITickable {
             }
         }
         return super.getCapability(capability, facing);
+    }
+
+    public FluidTank getInputTank() {
+        return this.inputTank;
+    }
+
+    public FluidTank getOutputTank() {
+        return this.outputTank;
     }
 }

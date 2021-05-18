@@ -6,11 +6,11 @@ import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.util.EnumBlockRenderType;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
+@SuppressWarnings("deprecation")
 public class BaseDirectionalBlockTF extends BlockDirectional {
     public BaseDirectionalBlockTF() {
         super(Material.ROCK);
@@ -49,6 +49,10 @@ public class BaseDirectionalBlockTF extends BlockDirectional {
     }
     @Override
     public boolean isFullBlock(IBlockState state) {
+        return false;
+    }
+    @Override
+    public boolean isBlockNormalCube(IBlockState state) {
         return false;
     }
 }
